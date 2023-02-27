@@ -1,6 +1,11 @@
 <template>
     <v-app id="inspire">
         <v-navigation-drawer v-model="drawer">
+            <div class="d-flex flex-column pa-4">
+                <h1>Postre</h1>
+                <v-divider class="my-4"></v-divider>
+                <v-btn @click="comboDialog=true" size="small" color="success" variant="flat" prepend-icon="mdi-plus">Create Combo</v-btn>
+            </div>
             <!--  -->
         </v-navigation-drawer>
 
@@ -8,6 +13,7 @@
             <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
 
             <v-toolbar-title>Application Settings</v-toolbar-title>
+
         </v-app-bar>
 
         <v-main>
@@ -37,7 +43,7 @@
                                     <div class="font-weight-bold text-body-2 me-auto"><span>&#8369;</span> {{ item.menuPrice
                                     }}
                                     </div>
-                                    <v-btn @click="edit(item)"  size="small" class="mr-1"><v-icon>mdi-pencil</v-icon></v-btn>
+                                    <v-btn @click="edit(item)" size="small" class="mr-1"><v-icon>mdi-pencil</v-icon></v-btn>
                                     <v-btn @click="remove(item)" size="small"><v-icon>mdi-delete-empty</v-icon></v-btn>
                                 </div>
                             </div>
@@ -82,11 +88,50 @@
             </v-card-text>
         </v-card>
     </v-dialog>
+
+    <v-dialog v-model="comboDialog" fullscreen :scrim="false" transition="dialog-bottom-transition">
+       
+        <v-card>
+            <v-toolbar dark color="success">
+                <v-btn icon dark @click="comboDialog = false">
+                    <v-icon>mdi-close</v-icon>
+                </v-btn>
+                <v-toolbar-title>Create combo package</v-toolbar-title>
+                <v-spacer></v-spacer>
+                
+            </v-toolbar>
+            
+            <v-divider></v-divider>
+            <v-row class="pa-4 ">
+                <v-col cols="6" class="h-50">
+                    <h2>Select Items</h2>
+                    <div v-for="item in data" >
+                        <div class="d-flex flex-wrap justify-space-between ma-2">
+                            <v-divider class="mb-2"></v-divider>
+                            <div class="w-50">{{ item.menuName }}</div>
+                            <v-btn @click="Addtocombo(item)" density="comfortable" color="green" prepend-icon="mdi-plus" size="small">Add</v-btn>
+                        </div>
+                    </div>
+                </v-col>
+                <v-col cols="6">
+                    <v-text-field v-model="combo.name"  class="mr-" label="Name" density="compact" variant="outlined"></v-text-field>
+                    <v-text-field v-model="combo.desc"  class="mr-" label="Description" density="compact" variant="outlined"></v-text-field>
+                    <v-text-field v-model="combo.disc"  class="mr-" label="Discount" density="compact" variant="outlined"></v-text-field>
+                    <v-text-field v-model="combo.price"  class="mr-" label="Price" density="compact" variant="outlined"></v-text-field>
+                    <h3>Includes:</h3>
+                    <div v-for="item in combo.members">
+                        {{ item.menuName }}
+                    </div>
+                    <v-btn @click="Savecombo()" :loading="loader" class="mt-5" prepend-icon="mdi-upload" color="blue">Save</v-btn>
+                </v-col>
+            </v-row>
+        </v-card>
+    </v-dialog>
 </template>
 
 <script setup>
 import { ref, onMounted, inject } from 'vue'
-import { ref as fireRef, getDatabase, child, get, set } from "firebase/database";
+import { ref as fireRef, getDatabase, child, get, set, query, orderByChild, orderByValue, limitToFirst  } from "firebase/database";
 import { ref as strRef, getDownloadURL, uploadBytes } from "firebase/storage";
 import { db, storage } from '@/firebase'
 import UUID from "vue3-uuid";
@@ -103,18 +148,37 @@ const menu = ref({
 });
 const drawer = ref(null)
 var dialog = ref(false)
+var comboDialog = ref(false)
 var image = ref(null)
 var url = ref(null)
+let loader = ref(false)
+const combo = ref({
+    name:'C1',
+    desc:'Comida Combo #1',
+    disc:800,
+    price:2300,
+    members:{}
+})
 const dbRef = fireRef(db);
 
 
 onMounted(async () => {
+
+
     getdata()
 });
 function getdata() {
-    get(child(dbRef, `Menu`)).then((snapshot) => {
-        data.value = snapshot.val()
-        console.log("RESULT", data);
+
+    const que = query(fireRef(db,'Menu'), orderByChild('menuName'));
+
+    get(que).then((snapshot) => {
+        const sorted ={}
+        snapshot.forEach(function(child) {
+            sorted[child.val().menuCode] = child.val()
+        });
+        // data.value = snapshot.val()
+        data.value = sorted
+        console.log("RESULT", sorted);
     })
 }
 
@@ -132,15 +196,24 @@ function edit(val) {
     }
 }
 function remove(val) {
-    this.menu.menuCode=val.menuCode
-    set(fireRef(db, 'Menu/' + val.menuCode),null);
-    set(fireRef(db, 'MenuCategory/'+ val.menuCategory +'/' + this.menu.menuCode),null);
+    this.menu.menuCode = val.menuCode
+    set(fireRef(db, 'Menu/' + val.menuCode), null);
+    set(fireRef(db, 'MenuCategory/' + val.menuCategory + '/' + this.menu.menuCode), null);
     console.log(this.menu.menuCode)
     getdata()
 }
+function Addtocombo(val){
+    this.combo.members[val.menuCode]=val
+}
+function Savecombo (){
+    this.loader = true
+     set(fireRef(db, 'Combo/' + combo.value.name), combo.value).then(() => {
+        this.loader=false
+    })
+}
 function updateMenu(val) {
     this.dialog = true
-    this.menu.menuCode=uuidv4()
+    this.menu.menuCode = uuidv4()
     const db = getDatabase();
 
     if (this.image != null) {
@@ -150,7 +223,7 @@ function updateMenu(val) {
             getDownloadURL(storageRef)
                 .then((url) => {
                     this.menu.img = url
-                    set(fireRef(db, 'MenuCategory/'+ this.menu.menuCategory +'/' + this.menu.menuCode), this.menu);
+                    set(fireRef(db, 'MenuCategory/' + this.menu.menuCategory + '/' + this.menu.menuCode), this.menu);
                     set(fireRef(db, 'Menu/' + this.menu.menuCode), this.menu);
                     this.dialog = false
                     getdata()
@@ -159,7 +232,7 @@ function updateMenu(val) {
         return
     }
 
-    set(fireRef(db, 'MenuCategory/'+ this.menu.menuCategory +'/' + this.menu.menuCode), this.menu);
+    set(fireRef(db, 'MenuCategory/' + this.menu.menuCategory + '/' + this.menu.menuCode), this.menu);
     set(fireRef(db, 'Menu/' + this.menu.menuCode), this.menu).then(() => {
         this.dialog = false
         getdata()
