@@ -1,8 +1,9 @@
 <template lang="">
+    
     <v-divider></v-divider>
-    <div class="d-flex align-center py-4 ">
+    <div class="d-flex align-center py-2 ">
             <div class="ma-0 pa-0 ">
-                <v-checkbox density="comfortable" label="" class="text-body-2 d-inline-flex"></v-checkbox>
+                <!-- <v-checkbox @click="Select(data.menuCode)" v-model="props.selecteditems.MenuCode" :value="data.menuCode" density="comfortable" label="" class="text-body-2 d-inline-flex"></v-checkbox> -->
             </div>
             <div class="mr-1">
                 <v-img class="align-end text-white " aspect-ratio="1" height="90" width="90" cover
@@ -15,9 +16,16 @@
                 </v-img>
             </div>
             <div class=" mx-3  w-100">
-                <h4 class="text-grey">{{data.menuName}}</h4>
-                <div class="text-grey text-caption py-"> {{data.menuDesc}}</div>
-                <div v-if="data.disc" class="text-caption text-green-accent-3">Discounted</div>
+                <div class="d-flex justify-space-between">
+                    <div>
+                        <h4 class="text-grey">{{data.menuName}}</h4>
+                        <div class="text-grey text-caption py-"> {{data.menuDesc}}</div>
+                    </div>
+                    <div>
+                        <v-btn v-if="isCombo" density="comfortable" variant="text" size="small" icon="mdi-swap-horizontal"></v-btn>
+                        <v-btn v-if="!isCombo" @click="RemoveItem(data.menuCode)" density="comfortable" variant="text" size="small" icon="mdi-delete-empty"></v-btn>
+                    </div>
+                </div>
                 <div class="d-flex align-center">
                     <div class="font-weight-bold text-body-2 me-auto"><span>&#8369;</span> {{data.menuPrice}}</div>
                     <div class=" d-flex">
@@ -30,13 +38,35 @@
         </div>
 </template>
 <script setup>
+import { inject, onMounted, ref } from 'vue'
 
+const emitter = inject('emitter');
+const selected = ref([]);
 const props = defineProps({
     data: {
         type: Object,
-        default:{}
+        default: {}
+    },
+    selecteditems: {
+        type: Object,
+        default: []
+    },
+    isCombo: {
+        type: Boolean,
+        default: false
     }
 })
+
+onMounted(() => {
+ 
+})
+
+// function Select(val) {
+//     emitter.emit('check-item', val);
+// }
+function RemoveItem(val){
+    emitter.emit('remove-item', val);
+}
 
 </script>
 <style lang="scss" scoped>

@@ -25,5 +25,7 @@ app.config.globalProperties.gVar = {
     location:"",
     about:"",
     items:{},
+    selectedItems:[],
+    combo:{},
 }
 app.mount('#app')

@@ -99,7 +99,7 @@ export default {
         const emitter = inject('emitter');   // Inject `emitter`
 
         emitter.on('add-per-menu', (value) => {   // *Listen* for event
-            this.cartItems++
+            this.cartItems += value
         });
     },
     methods: {

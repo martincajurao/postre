@@ -14,7 +14,7 @@
             </v-img>
 
         </v-card>
-        {{ items }}
+      
         <!-- Pork Dishes -->
         <div id="pork" class=" div2nd my-5 px-5 mt-12" style=" text-align: center;">
             <div class="text-body-1 font-weight-bold d-inline bg-red-accent-4 py-1 px-3 header-red ">
@@ -292,9 +292,9 @@ const smoothScroll = inject('smoothScroll');
 
 function AddToCart(val) {
     
-    const x = internalInstance.appContext.config.globalProperties.gVar.items[val.menuCode] = val
+     internalInstance.appContext.config.globalProperties.gVar.items[val.menuCode] = val
     this.snackbar = true
-    emitter.emit('add-per-menu', val);
+    emitter.emit('add-per-menu', 1);
 }
 function OpenCart(){
     // emitter.emit('add-permenu-items', items);
