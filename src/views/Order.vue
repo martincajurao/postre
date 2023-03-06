@@ -1,6 +1,6 @@
 <template>
-    <v-container>
-        <v-row class="checkout mt-15">
+    <v-container :key="updateKey">
+        <v-row class="checkout mt-15" >
             <v-col class="" cols="12" sm="8" style="background-color: 0E0E10;">
                 <v-responsive style="background-color: #0E0E10;" class="px-5 pt-4 my-4">
                     <h3 class="text-h5 font-weight-bold mb-4">
@@ -14,7 +14,7 @@
                 </v-responsive>
                 <v-responsive style="background-color: #0E0E10;" class="pa-5 my-4 ">
                     <div class="d-flex align-center justify-space-between">
-                        <!-- <h3>Package Combo ({{ Object.keys(combo).length }}) </h3> -->
+                        <h3>Package Combo ({{ Object.keys(combo).length }}) </h3>
                         <div>
                             <v-btn @click="dialog = true" density="comfortable" variant="text" size="small"
                                 icon="mdi-plus"></v-btn>
@@ -22,8 +22,8 @@
                                 icon="mdi-delete-empty"></v-btn>
                         </div>
                     </div>
-                    <TransitionGroup name="list" tag="ul">
-                    <div v-for="item in combo"  :key="updateKey">
+                    <TransitionGroup name="list" tag="ul" >
+                    <div v-for="item in combo" >
                         <v-divider class="mt-4"></v-divider>
                         <div class="d-flex align-center justify-space-between">
                             <!-- <v-checkbox :label="item.desc" class="text-body-2 d-inline-flex font-weight-bold">
@@ -55,7 +55,7 @@
                 </v-responsive>
             </v-col>
             <v-col class="" cols="12" sm="4" style="background-color: 15141B;">
-                <v-responsive style="background-color: #15141B;" class="pa-5 my-4 ">
+                <v-responsive style="background-color: #15141B;" class="pa-5 my-4 " >
                     <h3 class="text-h5 font-weight-bold">Order Summary</h3>
                     <!-- <div class="text-caption  text-grey ">Your order Sumarry</div> -->
                     <v-divider class="my-4"></v-divider>
@@ -63,7 +63,7 @@
                         <tbody>
                             <tr>
                                 <td class="text-grey text-body-2 py-1">Subtotal</td>
-                                <td class="text-right text-body-2 py-1"><span>&#8369;</span>
+                                <td class="text-right text-body-2 py-1" ><span>&#8369;</span>
                                     {{ computedtotal.toLocaleString('en-US') }}</td>
                             </tr>
                             <tr>
@@ -93,7 +93,7 @@
     <!-- MODAL -->
     <v-dialog v-model="dialog" fullscreen :scrim="false" transition="dialog-bottom-transition">
         <v-card color="black">
-            <v-toolbar dark color="black">
+            <v-toolbar dark color="red-accent-4">
                 <v-toolbar-title>Select from our Packages</v-toolbar-title>
                 <v-spacer></v-spacer>
                 <v-btn icon dark @click="dialog = false">
@@ -115,7 +115,7 @@ import { db, storage } from '@/firebase'
 
 const internalInstance = getCurrentInstance()
 const emitter = inject('emitter');
-const combo = ref( internalInstance.appContext.config.globalProperties.gVar.combo)
+const combo = ref({})
 const items = ref(internalInstance.appContext.config.globalProperties.gVar.items)
 const df = ref(0);
 const disc = ref(0);
@@ -129,7 +129,7 @@ const updateKey =ref(0)
 // const allSelected = ref(false);
 
 const computedtotal = computed(() => {
-
+    const keyup = updateKey.value
     const values = Object.values(items.value);
     const sumItems = values.reduce((s, a) => s + parseFloat(a.menuPrice), 0);
     let sumCombo = 0
@@ -140,7 +140,7 @@ const computedtotal = computed(() => {
         const values2 = Object.values(combo.value[x].members);
         sumCombo += values2.reduce((s, a) => s + parseFloat(a.menuPrice), 0);
     }
-    return sumCombo + sumItems;
+    return sumCombo + sumItems
 })
 // watch(items, (a) =>{
 // console.log("New value",a)
@@ -159,19 +159,20 @@ const computedtotal = computed(() => {
 
 onMounted(() => {
     const que = query(fireRef(db, 'Combo'));
+    combo.value =  internalInstance.appContext.config.globalProperties.gVar.combo
 
     get(que).then((snapshot) => {
         data.value = snapshot.val()
     })
 
     emitter.on('remove-item', (val) => {   // *Listen* for event
-        delete items.value[val];
+        delete items.value[val]
         // internalInstance.appContext.config.globalProperties.gVar.items = items.value
     });
     emitter.on('add-combo', (val) => {   // *Listen* for event
         dialog.value = false;
         combo.value[val.name] = val;
-        internalInstance.appContext.config.globalProperties.gVar.combo = combo.value
+        console.log('COMBO',combo.value)
         updateKey.value+=1
     });
     // selected.value = items
