@@ -17,7 +17,7 @@
               </v-img>
               <v-card-item>
                 <h3 >{{ item.desc }}</h3>
-                <v-chip class="mt-1" size="small" color="green-accent-4">Save &#8369;{{item.disc}}
+                <v-chip class="mt-1" size="small" color="green-accent-4">Save &#8369;{{Number(item.disc).toLocaleString()}}
                 </v-chip>
               </v-card-item>
               <v-card-text>
@@ -43,7 +43,7 @@
                   Reserve
                 </v-btn>
                 <v-spacer></v-spacer>
-                <h3 class="text-h4"> &#8369;{{item.price.toLocaleString()}}</h3>
+                <h3 class="text-h4"> &#8369;{{Number(item.price).toLocaleString()}}</h3>
               </v-card-actions>
             </v-card>
           </v-col>

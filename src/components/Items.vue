@@ -6,7 +6,7 @@
                 <!-- <v-checkbox @click="Select(data.menuCode)" v-model="props.selecteditems.MenuCode" :value="data.menuCode" density="comfortable" label="" class="text-body-2 d-inline-flex"></v-checkbox> -->
             </div>
             <div class="mr-1">
-                <v-img class="align-end text-white " aspect-ratio="1" height="90" width="90" cover
+                <v-img class="align-end text-white " aspect-ratio="1" height="70" width="70" cover
                     :src="data.img">
                     <template v-slot:placeholder>
                         <div class="d-flex align-center justify-center fill-height">
@@ -27,8 +27,8 @@
                     </div>
                 </div>
                 <div class="d-flex align-center">
-                    <div class="font-weight-bold text-body-2 me-auto"><span>&#8369;</span> {{data.menuPrice}}</div>
-                    <div class=" d-flex">
+                    <div class="font-weight-bold text-body-2 me-auto"><span>&#8369;</span> {{data.menuPrice.toLocaleString()}}</div>
+                    <div class=" d-flex" v-if="!isCombo">
                         <v-btn size="small" class="text-caption" density="compact" icon="mdi-minus"></v-btn>
                         <input disabled class="text-center text-body-2 " value="1" style="width: 20px;" />
                         <v-btn size="small" density="compact" icon="mdi-plus"></v-btn>

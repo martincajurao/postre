@@ -4,7 +4,9 @@
             <div class="d-flex flex-column pa-4">
                 <h1>Postre</h1>
                 <v-divider class="my-4"></v-divider>
-                <v-btn @click="comboDialog=true" size="small" color="success" variant="flat" prepend-icon="mdi-plus">Create Combo</v-btn>
+                <v-btn @click="comboDialog = true" size="small" color="success" variant="flat"
+                    prepend-icon="mdi-plus">Create
+                    Combo</v-btn>
             </div>
             <!--  -->
         </v-navigation-drawer>
@@ -58,13 +60,14 @@
                                 <v-file-input show-size="" accept="image/*" @change="Preview_image" v-model="image"
                                     density="comfortable" label="File input" prepend-icon="mdi-camera"></v-file-input>
                             </div>
-
+                            <v-text-field v-model="menu.menuCategory"></v-text-field>
                             <v-text-field clearable="" v-model="menu.menuName" color="primary" label="Menu Name"
                                 variant="underlined"></v-text-field>
                             <v-text-field clearable="" v-model="menu.menuDesc" color="primary" label="Menu Description"
                                 variant="underlined"></v-text-field>
                             <v-text-field clearable="" v-model="menu.menuPrice" color="primary" label="Price"
                                 variant="underlined"></v-text-field>
+                            <v-switch color="green" v-model="menu.isHot" label="Hot Menu"></v-switch>
                             <v-card-actions>
                                 <v-spacer></v-spacer>
 
@@ -90,7 +93,7 @@
     </v-dialog>
 
     <v-dialog v-model="comboDialog" fullscreen :scrim="false" transition="dialog-bottom-transition">
-       
+
         <v-card>
             <v-toolbar dark color="success">
                 <v-btn icon dark @click="comboDialog = false">
@@ -98,31 +101,37 @@
                 </v-btn>
                 <v-toolbar-title>Create combo package</v-toolbar-title>
                 <v-spacer></v-spacer>
-                
+
             </v-toolbar>
-            
+
             <v-divider></v-divider>
             <v-row class="pa-4 ">
                 <v-col cols="6" class="h-50">
                     <h2>Select Items</h2>
-                    <div v-for="item in data" >
+                    <div v-for="item in data">
                         <div class="d-flex flex-wrap justify-space-between ma-2">
                             <v-divider class="mb-2"></v-divider>
                             <div class="w-50">{{ item.menuName }}</div>
-                            <v-btn @click="Addtocombo(item)" density="comfortable" color="green" prepend-icon="mdi-plus" size="small">Add</v-btn>
+                            <v-btn @click="Addtocombo(item)" density="comfortable" color="green" prepend-icon="mdi-plus"
+                                size="small">Add</v-btn>
                         </div>
                     </div>
                 </v-col>
                 <v-col cols="6">
-                    <v-text-field v-model="combo.name"  class="mr-" label="Name" density="compact" variant="outlined"></v-text-field>
-                    <v-text-field v-model="combo.desc"  class="mr-" label="Description" density="compact" variant="outlined"></v-text-field>
-                    <v-text-field v-model="combo.disc"  class="mr-" label="Discount" density="compact" variant="outlined"></v-text-field>
-                    <v-text-field v-model="combo.price"  class="mr-" label="Price" density="compact" variant="outlined"></v-text-field>
+                    <v-text-field v-model="combo.name" class="mr-" label="Name" density="compact"
+                        variant="outlined"></v-text-field>
+                    <v-text-field v-model="combo.desc" class="mr-" label="Description" density="compact"
+                        variant="outlined"></v-text-field>
+                    <v-text-field v-model="combo.disc" class="mr-" label="Discount" density="compact"
+                        variant="outlined"></v-text-field>
+                    <v-text-field v-model="combo.price" class="mr-" label="Price" density="compact"
+                        variant="outlined"></v-text-field>
                     <h3>Includes:</h3>
                     <div v-for="item in combo.members">
                         {{ item.menuName }}
                     </div>
-                    <v-btn @click="Savecombo()" :loading="loader" class="mt-5" prepend-icon="mdi-upload" color="blue">Save</v-btn>
+                    <v-btn @click="Savecombo()" :loading="loader" class="mt-5" prepend-icon="mdi-upload"
+                        color="blue">Save</v-btn>
                 </v-col>
             </v-row>
         </v-card>
@@ -131,7 +140,7 @@
 
 <script setup>
 import { ref, onMounted, inject } from 'vue'
-import { ref as fireRef, getDatabase, child, get, set, query, orderByChild, orderByValue, limitToFirst  } from "firebase/database";
+import { ref as fireRef, getDatabase, child, get, set, query, orderByChild, orderByValue, limitToFirst } from "firebase/database";
 import { ref as strRef, getDownloadURL, uploadBytes } from "firebase/storage";
 import { db, storage } from '@/firebase'
 import UUID from "vue3-uuid";
@@ -141,7 +150,8 @@ const data = ref({});
 const menu = ref({
     menuDesc: "lorem epsum",
     menuStatus: 'Active',
-    menuCategory: 'PO',
+    isHot: false,
+    menuCategory: null,
     menuDisc: 250,
     menuCode: null,
     img: 'https://firebasestorage.googleapis.com/v0/b/postres-c30e4.appspot.com/o/img%2FIMG_20220420_133639.jpg?alt=media&token=bc565fbc-7776-4c8d-90c4-604d758e767a',
@@ -153,11 +163,11 @@ var image = ref(null)
 var url = ref(null)
 let loader = ref(false)
 const combo = ref({
-    name:'C1',
-    desc:'Comida Combo #1',
-    disc:800,
-    price:2300,
-    members:{}
+    name: 'C1',
+    desc: 'Comida Combo #1',
+    disc: 800,
+    price: 2300,
+    members: {}
 })
 const dbRef = fireRef(db);
 
@@ -169,11 +179,11 @@ onMounted(async () => {
 });
 function getdata() {
 
-    const que = query(fireRef(db,'Menu'), orderByChild('menuName'));
+    const que = query(fireRef(db, 'Menu'), orderByChild('menuName'));
 
     get(que).then((snapshot) => {
-        const sorted ={}
-        snapshot.forEach(function(child) {
+        const sorted = {}
+        snapshot.forEach(function (child) {
             sorted[child.val().menuCode] = child.val()
         });
         // data.value = snapshot.val()
@@ -190,8 +200,15 @@ function Preview_image(e) {
 }
 function edit(val) {
     this.menu = {
-        menuName: val.menuDesc,
+        menuName: val.menuName,
+        menuCode: val.menuCode,
         menuPrice: val.menuPrice,
+        menuDesc: val.menuDesc,
+        img: val.img,
+        isHot: val.isHot,
+        menuCategory: val.menuCategory,
+        buyQty: 1,
+
 
     }
 }
@@ -202,35 +219,36 @@ function remove(val) {
     console.log(this.menu.menuCode)
     getdata()
 }
-function Addtocombo(val){
-    this.combo.members[val.menuCode]=val
+function Addtocombo(val) {
+    this.combo.members[val.menuCode] = val
 }
-function Savecombo (){
+function Savecombo() {
     this.loader = true
-     set(fireRef(db, 'Combo/' + combo.value.name), combo.value).then(() => {
-        this.loader=false
+    set(fireRef(db, 'Combo/' + combo.value.name), combo.value).then(() => {
+        this.loader = false
     })
 }
 function updateMenu(val) {
     this.dialog = true
-    this.menu.menuCode = uuidv4()
+    // this.menu.menuCode = uuidv4()
     const db = getDatabase();
-
-    if (this.image != null) {
-        const storageRef = strRef(storage, 'img/' + this.image.name);
-        uploadBytes(storageRef, this.image).then((snapshot) => {
-            console.log('Uploaded an Image file', snapshot);
-            getDownloadURL(storageRef)
-                .then((url) => {
-                    this.menu.img = url
-                    set(fireRef(db, 'MenuCategory/' + this.menu.menuCategory + '/' + this.menu.menuCode), this.menu);
-                    set(fireRef(db, 'Menu/' + this.menu.menuCode), this.menu);
-                    this.dialog = false
-                    getdata()
-                })
-        });
-        return
-    }
+    set(fireRef(db, 'MenuCategory/' + this.menu.menuCategory + '/' + this.menu.menuCode), this.menu);
+    set(fireRef(db, 'Menu/' + this.menu.menuCode), this.menu);
+    // if (this.image != null) {
+    //     const storageRef = strRef(storage, 'img/' + this.image.name);
+    //     uploadBytes(storageRef, this.image).then((snapshot) => {
+    //         console.log('Uploaded an Image file', snapshot);
+    //         getDownloadURL(storageRef)
+    //             .then((url) => {
+    //                 this.menu.img = url
+    //                 set(fireRef(db, 'MenuCategory/' + this.menu.menuCategory + '/' + this.menu.menuCode), this.menu);
+    //                 set(fireRef(db, 'Menu/' + this.menu.menuCode), this.menu);
+    //                 this.dialog = false
+    //                 getdata()
+    //             })
+    //     });
+    //     return
+    // }
 
     set(fireRef(db, 'MenuCategory/' + this.menu.menuCategory + '/' + this.menu.menuCode), this.menu);
     set(fireRef(db, 'Menu/' + this.menu.menuCode), this.menu).then(() => {
