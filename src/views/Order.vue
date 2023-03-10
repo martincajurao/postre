@@ -1,26 +1,39 @@
 <template>
-    <v-container :key="updateKey" class="">
-        <v-row class="checkout mt-15 ">
+    <v-container class="pb-0 mb-0 ">
+        <v-img src="" class="align-end text-white py-0" height="150" cover>
+            <v-card-title class="text-body-1">
+                <span>Home</span>
+                <v-icon icon="mdi-chevron-right"></v-icon>
+                <span>Order</span>
+                <h1 class="text-h4"
+                    style="font-family: Montserrat !important; font-weight: 800; text-transform: uppercase !important;">
+                    Your Order
+                </h1>
+            </v-card-title>
+        </v-img>
+    </v-container>
+    <v-container :key="updateKey" class="mt-0 pt-0">
+        <v-row class="checkout  ">
             <v-col class="" cols="12" sm="8" style="background-color: 0E0E10;">
-                <v-responsive style="background-color: #0E0E10;" class="px-5 pt-4 my-4">
+                <!-- <v-responsive style="background-color: #0E0E10;" class="px-5 pt-4 my-4">
                     <h2 class="mb-4"
                         style="font-family: Montserrat !important; font-weight: 800; text-transform: uppercase !important;">
                         Your Order
                     </h2>
-                    <!-- <div class="d-flex align-center justify-space-between">
+                    <div class="d-flex align-center justify-space-between">
                         <v-checkbox color="red-accent-1" chips="true" hide-details="true" label="Select all items"
                             class="text-body-2"></v-checkbox>
                         <v-btn density="comfortable" variant="text" size="small" icon="mdi-delete-empty"></v-btn>
-                    </div> -->
-                </v-responsive>
+                    </div>
+                </v-responsive> -->
                 <v-responsive style="background-color: #0E0E10;" class="pa-5 my-4 ">
                     <div class="d-flex align-center justify-space-between">
                         <h3>Package Combo ({{ Object.keys(combo).length }}) </h3>
                         <div>
                             <v-btn @click="dialog = true" density="comfortable" variant="flat" size="small" class="mr-2"
                                 icon="mdi-plus"></v-btn>
-                            <v-btn @click="combo = {}; gVar.combo = {}" density="comfortable" variant="flat" size="small"
-                                icon="mdi-delete-empty"></v-btn>
+                            <v-btn @click="emitter.emit('remove', Object.keys(combo).length); combo = {}; gVar.combo = {}"
+                                density="comfortable" variant="flat" size="small" icon="mdi-delete-empty"></v-btn>
                         </div>
                     </div>
                     <TransitionGroup name="list" tag="ul">
@@ -29,38 +42,42 @@
                             <div class="d-flex align-center justify-space-between">
                                 <!-- <v-checkbox :label="item.desc" class="text-body-2 d-inline-flex font-weight-bold">
                             </v-checkbox> -->
-                                <div class="font-weight-bold text-grey mt-4 my-2">{{ item.desc }} <v-chip size="small"
-                                        color="amber">&#8369;{{ item.price.toLocaleString("En") }}</v-chip></div>
+                                <div class="font-weight-bold text-grey mt-4 my-2">{{ item.desc }} 
+                                    <v-chip size="small" color="amber">
+                                        &#8369;{{  (Object.values(item.members).reduce((s, a) => s + parseFloat(a.menuPrice), 0) - item.disc).toLocaleString() }}
+                                    </v-chip>
+                                </div>
                                 <div>{{ }}</div>
-                                <div class="text-body-2 text-green-accent-4"> Discounted &#8369;{{
+                                <div class="text-body-2 text-green-accent-4"> Less &#8369;{{
                                     item.disc.toLocaleString("En") }}</div>
-                                <v-btn @click="delete combo[item.name]" density="comfortable" variant="text" size="small"
-                                    icon="mdi-delete-empty"></v-btn>
+                                <v-btn @click="emitter.emit('remove', 1); delete combo[item.name]" density="comfortable"
+                                    variant="text" size="small" icon="mdi-delete-empty"></v-btn>
                             </div>
-                            <div v-for="menuitem in item.members">
-                                <Item :data="menuitem" :isCombo="true" />
+                            <div v-for="menuitem, selectedkey in item.members">
+                                <Item :data="menuitem" :isCombo="true" :selectedCombo = item :selectedkey = selectedkey />
                             </div>
                         </div>
                     </TransitionGroup>
                 </v-responsive>
                 <v-responsive style="background-color: #0E0E10;" class="pa-5 my-4 ">
                     <div class="d-flex  align-center mb-5">
-                        <h3 class="mt-">Per Menu ({{ Object.keys(items).length }})</h3>
+                        <h3 class="mt-">Per Menu ({{ itemsCount }})</h3>
                         <v-spacer></v-spacer>
-                        <v-btn @click="OpenMenu(); menudialog = true"  variant="flat" class="mr-2"
-                            size="small" density="comfortable" icon> <v-icon>mdi-plus</v-icon> </v-btn>
-                        <v-btn @click="items={}"  variant="flat"
+                        <v-btn @click="OpenMenu(); menudialog = true" variant="flat" class="mr-2" size="small"
+                            density="comfortable" icon> <v-icon>mdi-plus</v-icon> </v-btn>
+                        <v-btn @click="emitter.emit('remove', Object.keys(items).length); items = {};" variant="flat"
                             size="small" density="comfortable" icon> <v-icon>mdi-delete-empty</v-icon> </v-btn>
                     </div>
                     <!-- <v-checkbox @click="selectAll" v-model="allSelected">Select all</v-checkbox> -->
                     <TransitionGroup name="list" tag="ul">
                         <div v-for="item in items">
-                            <Item :data="item" :selecteditems="selecteditems" />
+                            <Item :data="item" />
                         </div>
                     </TransitionGroup>
                 </v-responsive>
             </v-col>
-            <v-col class="" cols="12" sm="4" style="background-color: 15141B; position: sticky !important; top: 20 !important; ">
+            <v-col class="" cols="12" sm="4"
+                style="background-color: 15141B; position: sticky !important; top: 20 !important; ">
                 <v-responsive style="background-color: #15141B;" class="pa-5 my-4 ">
                     <h2 class="  font-weight-bold"
                         style="font-family: Montserrat !important; font-weight: 800; text-transform: uppercase !important;">
@@ -76,7 +93,7 @@
                                     {{ combosub.toLocaleString('en-US') }}</td>
                             </tr>
                             <tr>
-                                <td class="text-grey text-body-2 py-1">Per Menu subtotal ({{ Object.keys(items).length }})
+                                <td class="text-grey text-body-2 py-1">Per Menu subtotal ({{ itemsCount }})
                                 </td>
                                 <td class="text-right text-body-2 py-1"><span>&#8369;</span>
                                     {{ permenusub.toLocaleString('en-US') }}</td>
@@ -105,6 +122,7 @@
             </v-col>
         </v-row>
     </v-container>
+
     <!-- MODAL -->
     <v-dialog v-model="dialog" fullscreen :scrim="false" transition="dialog-bottom-transition">
         <v-card color="black">
@@ -118,11 +136,66 @@
             <Combo :data=data />
         </v-card>
     </v-dialog>
+
+    <!-- MODAL -->
+    <v-dialog max-width="800px"  v-model="changedialog" :scrim="false" transition="dialog-bottom-transition">
+        <v-card color="#111">
+            <v-toolbar color="#111">
+                <v-icon class="ml-4">mdi-swap-horizontal</v-icon>
+                <v-toolbar-title class="font-weight-bold"> Change Menu</v-toolbar-title>
+                <v-spacer></v-spacer>
+                <v-btn icon dark @click="changedialog = false">
+                    <v-icon>mdi-close</v-icon>
+                </v-btn>
+            </v-toolbar>
+            <v-container class="mb-4">
+                <v-row>
+                    <v-col cols="12" sm="6" v-for="item in changeMenuData" class="">
+                        <!-- <v-divider class="mb-5"></v-divider> -->
+                        <div class="d-flex align-center justify-end " style="max-width: 350px; margin: auto;" >
+                            <v-badge v-if="item.isHot" :content="'Hot'" color="red-accent-4" offset-x="6" offset-y="6">
+                                <v-avatar size="60px">
+                                    <v-img alt="Avatar" :src="item.img" cover>
+                                        <template v-slot:placeholder>
+                                            <div class="d-flex align-center justify-center fill-height">
+                                                <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
+                                            </div>
+                                        </template>
+                                    </v-img>
+                                </v-avatar>
+                            </v-badge>
+                            <v-avatar v-else size="60px">
+                                <v-img alt="Avatar" :src="item.img" cover>
+                                    <template v-slot:placeholder>
+                                        <div class="d-flex align-center justify-center fill-height">
+                                            <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
+                                        </div>
+                                    </template>
+                                </v-img>
+                            </v-avatar>
+                            <div class="d-flex flex-column  justify-center text-grey mx-6">
+                                <div class=" font-weight-bold text-body-2">{{ item.menuName }}</div>
+                                <small>{{ item.menuDesc }}</small>
+                            </div>
+                            <v-spacer></v-spacer>
+                            <div class="d-flex justify-end align-center" style="min-width: 90px;">
+                                <span>&#8369;</span>{{ Number(item.menuPrice).toLocaleString('en-US') }}
+                                <v-btn color="" @click=" changedialog = false; combo[selectedchange.combo].members[selectedchange.selectedkey] = item"
+                                     class="ml-2" size="small" density="comfortable" icon>
+                                    <v-icon>mdi-cached</v-icon>
+                                </v-btn>
+                            </div>
+                        </div>
+                    </v-col>
+                </v-row>
+            </v-container>
+        </v-card>
+    </v-dialog>
     <!-- MODAL -->
     <v-dialog v-model="menudialog" fullscreen :scrim="false" scrollable="true" transition="dialog-bottom-transition">
         <v-card color="#111">
             <v-toolbar color="#111">
-                <v-btn @click="menudialog=false" icon>
+                <v-btn @click="menudialog = false" icon>
                     <v-icon>mdi-arrow-left</v-icon>
                 </v-btn>
                 <v-toolbar-title>Select Menu</v-toolbar-title>
@@ -130,7 +203,7 @@
                 <!-- <v-btn icon>
                     <v-icon>mdi-magnify</v-icon>
                 </v-btn> -->
-                <v-btn icon @click="menudialog=false">
+                <v-btn icon @click="menudialog = false">
                     <v-icon>mdi-close</v-icon>
                 </v-btn>
             </v-toolbar>
@@ -163,7 +236,7 @@
                     <div class="text-body-1"> Seafood</div>
                 </v-tab>
             </v-tabs>
-            <v-window v-model="tab" class="h-75"  style="overflow-y: auto;" >
+            <v-window v-model="tab" class="h-75" style="overflow-y: auto;">
                 <v-window-item v-for="menu, key in menuData" :value="key">
                     <v-container>
                         <v-row>
@@ -200,14 +273,17 @@
                                     <v-spacer></v-spacer>
                                     <div>
                                         <span>&#8369;</span>{{ Number(item.menuPrice).toLocaleString('en-US') }}
-                                        <v-btn @click="items[item.menuCode]=item; menudialog=false" color="" size="small" class="ml-4" density="comfortable" icon>
-                                            <v-icon>mdi-cart</v-icon></v-btn>
+                                        <v-btn
+                                            @click="items[item.menuCode] = item; menudialog = false; emitter.emit('add-per-menu', 1)"
+                                            size="small" class="ml-4" density="comfortable" icon>
+                                            <v-icon>mdi-cart</v-icon>
+                                        </v-btn>
                                     </div>
                                 </div>
                             </v-col>
                         </v-row>
                     </v-container>
-                   
+
                 </v-window-item>
             </v-window>
         </v-card>
@@ -224,14 +300,18 @@ const internalInstance = getCurrentInstance()
 const emitter = inject('emitter');
 const combo = ref({})
 const items = ref(internalInstance.appContext.config.globalProperties.gVar.items)
+const itemsCount = ref(0)
 const df = ref(0);
 const disc = ref(0);
 const permenusub = ref(0)
 const combosub = ref(0)
 const dialog = ref(false)
+const changedialog = ref(false)
+const selectedchange = ref(null)
 const menudialog = ref(false)
 const data = ref(null)
 const menuData = ref(null)
+const changeMenuData = ref({})
 const show = ref(true)
 const updateKey = ref(0)
 const tab = ref(null)
@@ -244,6 +324,8 @@ const computedtotal = computed(() => {
     const keyup = updateKey.value
     const values = Object.values(items.value);
     permenusub.value = values.reduce((s, a) => s + parseFloat(a.menuPrice), 0);
+    itemsCount.value = values.reduce((s, a) => s + parseFloat(a.buyQty), 0);
+
     combosub.value = 0
     disc.value = 0
 
@@ -289,6 +371,27 @@ onMounted(() => {
         combo.value[val.name] = val;
         console.log('COMBO', combo.value)
         updateKey.value += 1
+    });
+    emitter.on('add-qty', (val) => {   // *Listen* for event
+        const i = parseFloat(val.menuPrice) / parseFloat(val.buyQty)
+        val['buyQty'] += 1
+        val['menuPrice'] = parseFloat(val.menuPrice) + i
+    });
+    emitter.on('remove-qty', (val) => {   // *Listen* for event
+        const i = parseFloat(val.menuPrice) / parseFloat(val.buyQty)
+        val['buyQty'] -= 1
+        val['menuPrice'] = parseFloat(val.menuPrice) - i
+    });
+    emitter.on('change-menu', (val) => {   // *Listen* for event
+        changedialog.value = true
+        changeMenuData.value = {}
+        selectedchange.value = val
+        const q = query(fireRef(db, 'MenuCategory/' + val.menuCategory));
+
+        get(q).then((snapshot) => {
+            changeMenuData.value = snapshot.val()
+        })
+        console.log(selectedchange.value)
     });
 
     // selected.value = items
@@ -339,4 +442,5 @@ h3 {
     position: absolute !important;
     left: 1px;
     top: 0px;
-}</style>
+}
+</style>

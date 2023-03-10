@@ -101,6 +101,9 @@ export default {
         emitter.on('add-per-menu', (value) => {   // *Listen* for event
             this.cartItems += value
         });
+        emitter.on('remove', (value) => {   // *Listen* for event
+            this.cartItems -= value
+        });
     },
     methods: {
         toggleMobileNav() {

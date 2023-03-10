@@ -1,12 +1,15 @@
 <template>
     <div class="mainWrap">
         <v-card class="mx-auto ">
-            <v-img src="" class="align-end text-white banner-img pa-5" height="350" cover>
-                <v-card-title class="">
+            <v-img src="" class="align-end text-white banner-img pa-5" height="250" cover>
+                <v-card-title class="text-body-1">
+                    <span>Home</span>
+                    <v-icon icon="mdi-chevron-right"></v-icon>
+                    <span>Menu</span>
                     <h1 class="text-h3"
                         style="font-family: Montserrat !important; font-weight: 800; text-transform: uppercase !important;">
-                        Our Menu</h1>
-                       
+                        Our Menu
+                    </h1>
                 </v-card-title>
                 <v-card-subtitle class="">
                     <span class="max-w200">Inspired by recipes and creations of Calbayog Samar.</span>
@@ -14,7 +17,7 @@
             </v-img>
 
         </v-card>
-      
+
         <!-- Pork Dishes -->
         <div id="pork" class=" div2nd my-5 px-5 mt-12" style=" text-align: center;">
             <div class="text-body-1 font-weight-bold d-inline bg-red-accent-4 py-1 px-3 header-red ">
@@ -31,7 +34,8 @@
                 <v-col cols="12" sm="6" md="4" v-for="item in data.PO" :key="item.menuCode">
                     <v-card class="menu-card  menu-card align-center d-flex flex-row ">
                         <div @click="dialog = true">
-                            <v-img class="align-end text-white " aspect-ratio="1" height="170" width="170" cover :src="item.img">
+                            <v-img class="align-end text-white " aspect-ratio="1" height="170" width="170" cover
+                                :src="item.img">
                                 <template v-slot:placeholder>
                                     <div class="d-flex align-center justify-center fill-height">
                                         <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
@@ -75,7 +79,8 @@
                 <v-col cols="12" sm="6" md="4" v-for="item in data.CH" :key="item.menuCode">
                     <v-card class="menu-card  align-center d-flex flex-row ">
                         <div>
-                            <v-img class="align-end text-white " aspect-ratio="1" height="170" width="170" cover :src="item.img">
+                            <v-img class="align-end text-white " aspect-ratio="1" height="170" width="170" cover
+                                :src="item.img">
                                 <v-card-title></v-card-title>
                             </v-img>
                         </div>
@@ -106,7 +111,8 @@
                 <v-col cols="12" sm="6" md="4" v-for="item in data.PA" :key="item.menuCode">
                     <v-card class="menu-card  align-center d-flex flex-row ">
                         <div>
-                            <v-img class="align-end text-white " aspect-ratio="1" height="170" width="170" cover :src="item.img">
+                            <v-img class="align-end text-white " aspect-ratio="1" height="170" width="170" cover
+                                :src="item.img">
                                 <v-card-title></v-card-title>
                             </v-img>
                         </div>
@@ -137,7 +143,8 @@
                 <v-col cols="12" sm="6" md="4" v-for="item in data.VE" :key="item.menuCode">
                     <v-card class="menu-card  align-center d-flex flex-row ">
                         <div>
-                            <v-img class="align-end text-white " aspect-ratio="1" height="170" width="170" cover :src="item.img">
+                            <v-img class="align-end text-white " aspect-ratio="1" height="170" width="170" cover
+                                :src="item.img">
                                 <v-card-title></v-card-title>
                             </v-img>
                         </div>
@@ -168,7 +175,8 @@
                 <v-col cols="12" sm="6" md="4" v-for="item in data.MC" :key="item.menuCode">
                     <v-card class="menu-card  align-center d-flex flex-row ">
                         <div>
-                            <v-img class="align-end text-white " aspect-ratio="1" height="170" width="170" cover :src="item.img">
+                            <v-img class="align-end text-white " aspect-ratio="1" height="170" width="170" cover
+                                :src="item.img">
                                 <v-card-title></v-card-title>
                             </v-img>
                         </div>
@@ -199,7 +207,8 @@
                 <v-col cols="12" sm="6" md="4" v-for="item in data.SF" :key="item.menuCode">
                     <v-card class="menu-card  align-center d-flex flex-row ">
                         <div>
-                            <v-img class="align-end text-white " aspect-ratio="1" height="170" width="170" cover :src="item.img">
+                            <v-img class="align-end text-white " aspect-ratio="1" height="170" width="170" cover
+                                :src="item.img">
                                 <v-card-title></v-card-title>
                             </v-img>
                         </div>
@@ -267,7 +276,6 @@
             </v-card>
         </v-dialog>
     </div>
-  
 </template>
 
 <script setup>
@@ -291,14 +299,14 @@ const emitter = inject('emitter');
 const smoothScroll = inject('smoothScroll');
 
 function AddToCart(val) {
-    
-     internalInstance.appContext.config.globalProperties.gVar.items[val.menuCode] = val
+
+    internalInstance.appContext.config.globalProperties.gVar.items[val.menuCode] = val
     this.snackbar = true
     emitter.emit('add-per-menu', 1);
 }
-function OpenCart(){
+function OpenCart() {
     // emitter.emit('add-permenu-items', items);
- 
+
     snackbar = false
 }
 function navigateTo(val) {
@@ -310,7 +318,7 @@ function navigateTo(val) {
     })
 }
 onMounted(async () => {
-   
+
     const dbRef = fireRef(db);
     get(child(dbRef, `MenuCategory/`)).then((snapshot) => {
         data.value = snapshot.val()
@@ -417,5 +425,4 @@ onMounted(async () => {
     100% {
         transform: translate(1px, -2px) rotate(-1deg);
     }
-}
-</style>
+}</style>

@@ -1,18 +1,23 @@
 <template>
-        <v-container class="">
-            <v-img src="" class="align-end text-white banner-img py-0" height="160" cover>
-                <v-card-title class="">
-                    <div class="text-body-1">Order | Checkout | Confirm</div>
-                    <h1 class="text-h4"
-                        style="font-family: Montserrat !important; font-weight: 800; text-transform: uppercase !important;">
-                        Place Order</h1>
-                </v-card-title>
-            </v-img>
-        </v-container>
+    <v-container class="pb-0">
+        <v-img src="" class="align-end text-white py-0" height="150" cover>
+            <v-card-title class="text-body-1">
+                <span>Home</span>
+                <v-icon icon="mdi-chevron-right"></v-icon>
+                <span>Order</span>
+                <v-icon icon="mdi-chevron-right"></v-icon>
+                <span>Confirm</span>
+                <h1 class="text-h4"
+                    style="font-family: Montserrat !important; font-weight: 800; text-transform: uppercase !important;">
+                    Place Order
+                </h1>
+            </v-card-title>
+        </v-img>
+    </v-container>
     <v-container>
-        <v-row class="checkout ">
+        <v-row >
             <v-col class="" cols="12" sm="8" style="background-color: 0E0E10;">
-                <v-responsive style="background-color: #0E0E10;" class="px-5 pt-4 my-4">
+                <v-responsive style="background-color: #0E0E10;" class="px-5 pt-4 my-0">
                     <h3 class="text-h5 font-weight-bold mb-4">
                         DELIVERY
                     </h3>
@@ -67,13 +72,13 @@
                     </v-row>
                 </v-responsive>
 
-                <v-responsive style="background-color: #0E0E10;" class="px-5 pt-4 my-4">
+                <v-responsive style="background-color: #0E0E10;" class="px-5 py-4 my-4">
                     <h3 class="text-h5 font-weight-bold mb-4">
                         ORDERED ITEMS (4)
                     </h3>
-                    <h4 class="py-2">Comida Combo #1</h4 >
+                    <h4 class="py-2">Comida Combo #1</h4>
                     <div v-for="x in 4">
-                        
+
                         <v-divider></v-divider>
                         <div class="d-flex align-center py-2 justify-space-between">
                             <div class="d-flex align-center">
@@ -82,7 +87,8 @@
                                         src="https://firebasestorage.googleapis.com/v0/b/postres-c30e4.appspot.com/o/img%2FIMG_20220420_133639.jpg?alt=media&token=bc565fbc-7776-4c8d-90c4-604d758e767a">
                                         <template v-slot:placeholder>
                                             <div class="d-flex align-center justify-center fill-height">
-                                                <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
+                                                <v-progress-circular color="grey-lighten-4"
+                                                    indeterminate></v-progress-circular>
                                             </div>
                                         </template>
                                     </v-img>
@@ -96,20 +102,22 @@
                                 <div v-if="data.disc" class="text-caption text-green-accent-3">Discounted</div>
                             </div>
                             <div>
-                                <div  class="text-body-2 ">Qty (1)</div>
+                                <div class="text-body-2 ">Qty (1)</div>
                             </div>
                             <div>
-                                <div class="font-weight-bold text-body-2 me-auto"><span>&#8369;</span> {{ data.price }}</div>
+                                <div class="font-weight-bold text-body-2 me-auto"><span>&#8369;</span> {{ data.price }}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </v-responsive>
                 <div class="d-flex justify-center my-10">
-                    <v-btn prepend-icon="mdi-arrow-left-drop-circle" size="x-large" variant="outlined" color="orange-accent-4" class="font-weight-bold ">Go to Menu</v-btn>
+                    <v-btn prepend-icon="mdi-arrow-left-drop-circle" size="x-large" variant="outlined"
+                        color="orange-accent-4" class="font-weight-bold ">Go to Menu</v-btn>
                 </div>
             </v-col>
             <v-col class="" cols="12" sm="4" style="background-color: 15141B;">
-                <v-responsive style="background-color: #15141B;" class="pa-5 my-4 ">
+                <v-responsive style="background-color: #15141B;" class="pa-5 my-0 ">
                     <h3 class="text-h6 font-weight-bold  text-uppercase">Payment Methods</h3>
                     <div class="payment-mode d-flex align-center justify-space-between">
                         <div class="w-50 " style="height: 4rem;">

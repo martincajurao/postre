@@ -1,5 +1,4 @@
 <template lang="">
-    
     <v-divider></v-divider>
     <div class="d-flex align-center py-2 ">
             <div class="ma-0 pa-0 ">
@@ -22,16 +21,17 @@
                         <div class="text-grey text-caption py-"> {{data.menuDesc}}</div>
                     </div>
                     <div>
-                        <v-btn v-if="isCombo" density="comfortable" variant="text" size="small" icon="mdi-swap-horizontal"></v-btn>
-                        <v-btn v-if="!isCombo" @click="RemoveItem(data.menuCode)" density="comfortable" variant="text" size="small" icon="mdi-delete-empty"></v-btn>
+                        <v-btn v-if="isCombo" @click="data.combo = selectedCombo.name; data.selectedkey = selectedkey; emitter.emit('change-menu', data)" density="comfortable" variant="text" size="small" icon="mdi-swap-horizontal"></v-btn>
+                        <v-btn v-if="!isCombo" @click="RemoveItem(data.menuCode); emitter.emit('remove', 1)" density="comfortable" variant="text" size="small" icon="mdi-delete-empty"></v-btn>
                     </div>
                 </div>
                 <div class="d-flex align-center">
-                    <div class="font-weight-bold text-body-2 me-auto"><span>&#8369;</span> {{data.menuPrice.toLocaleString()}}</div>
+                    <div class="font-weight-bold text-body-2 me-auto"><span>&#8369;</span> {{Number(data.menuPrice).toLocaleString()}}</div>
                     <div class=" d-flex" v-if="!isCombo">
-                        <v-btn size="small" class="text-caption" density="compact" icon="mdi-minus"></v-btn>
-                        <input disabled class="text-center text-body-2 " value="1" style="width: 20px;" />
-                        <v-btn size="small" density="compact" icon="mdi-plus"></v-btn>
+                        <v-btn v-if="data.buyQty > 1" @click="removeQty(data);  " size="small" class="text-caption" density="compact" icon="mdi-minus"></v-btn>
+                        <v-btn v-else @click="removeQty(data)" disabled size="small" class="text-caption" density="compact" icon="mdi-minus"></v-btn>
+                        <input disabled class="text-center text-body-1 " :value="data.buyQty" style="width: 20px;" />
+                        <v-btn @click="addQty(data)" size="small" density="compact" icon="mdi-plus"></v-btn>
                     </div>
                 </div>
             </div>
@@ -51,9 +51,17 @@ const props = defineProps({
         type: Object,
         default: []
     },
+    selectedCombo: {
+        type: Object,
+        default: {}
+    },
     isCombo: {
         type: Boolean,
         default: false
+    },
+    selectedkey: {
+        type: String,
+        default: ''
     }
 })
 
@@ -67,6 +75,13 @@ onMounted(() => {
 function RemoveItem(val){
     emitter.emit('remove-item', val);
 }
+function addQty(val){
+    emitter.emit('add-qty', val);
+}
+function removeQty(val){
+    emitter.emit('remove-qty', val);
+}
+
 
 </script>
 <style lang="scss" scoped>
