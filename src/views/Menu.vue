@@ -1,6 +1,9 @@
 <template>
-    <div class="mainWrap">
+    <div class="mainWrap mb-15">
+
+
         <v-card class="mx-auto ">
+
             <v-img src="" class="align-end text-white banner-img pa-5" height="250" cover>
                 <v-card-title class="text-body-1">
                     <span>Home</span>
@@ -15,9 +18,8 @@
                     <span class="max-w200">Inspired by recipes and creations of Calbayog Samar.</span>
                 </v-card-subtitle>
             </v-img>
-
         </v-card>
-
+       
         <!-- Pork Dishes -->
         <div id="pork" class=" div2nd my-5 px-5 mt-12" style=" text-align: center;">
             <div class="text-body-1 font-weight-bold d-inline bg-red-accent-4 py-1 px-3 header-red ">
@@ -31,9 +33,11 @@
 
         <v-container v-if="!fetching">
             <v-row justify="center" align="center" class="">
-                <v-col cols="12" sm="6" md="4" v-for="item in data.PO" :key="item.menuCode">
+                <v-col cols="12" sm="6" md="4" v-for="item in data.PO" :key="item.menuCode"
+                    style="position: relative !important;">
+                    <v-img v-if="item.isHot" class="best-seller" src="@/assets/best-seller.png" width="120" cover></v-img>
                     <v-card class="menu-card  menu-card align-center d-flex flex-row ">
-                        <div @click="dialog = true">
+                        <div style="position:relative;" @click="dialog = true">
                             <v-img class="align-end text-white " aspect-ratio="1" height="170" width="170" cover
                                 :src="item.img">
                                 <template v-slot:placeholder>
@@ -42,11 +46,20 @@
                                     </div>
                                 </template>
                             </v-img>
+                            <v-btn
+                              icon
+                              class="download-btn"
+                              size="small"
+                              style="position: absolute; top: 8px; right: 8px; background: #fff; color: #ff1744; box-shadow: 0 2px 8px rgba(0,0,0,0.12); z-index: 2;"
+                              @click.stop="downloadImage(item.img, item.menuName)"
+                            >
+                              <v-icon>mdi-download</v-icon>
+                            </v-btn>
                         </div>
                         <div class="  align-center pa-4">
                             <h4 class="">{{ item.menuName }}</h4>
                             <div class=" text-grey-lighten-1 text-caption">Tasty & Crispy Spare Ribs</div>
-                            <h5 class="my-2">Php {{ item.menuPrice }}</h5>
+                            <h5 class="my-2">&#8369;{{ Number(item.menuPrice).toLocaleString() }}</h5>
                             <v-btn @click="AddToCart(item)" class="mt-1 text-subtitle-2" density="comfortable"
                                 prepend-icon="mdi-cart" color="amber" variant="outlined">Add to order</v-btn>
                         </div>
@@ -76,22 +89,29 @@
         </div>
         <v-container>
             <v-row justify="center" align="center" class="">
-                <v-col cols="12" sm="6" md="4" v-for="item in data.CH" :key="item.menuCode">
-                    <v-card class="menu-card  align-center d-flex flex-row ">
-                        <div>
+                <v-col cols="12" sm="6" md="4" v-for="item in data.CH" :key="item.menuCode"
+                    style="position: relative !important;">
+                    <v-img v-if="item.isHot" class="best-seller" src="@/assets/best-seller.png" width="120" cover></v-img>
+                    <v-card class="menu-card  menu-card align-center d-flex flex-row ">
+                        <div @click="dialog = true">
                             <v-img class="align-end text-white " aspect-ratio="1" height="170" width="170" cover
                                 :src="item.img">
-                                <v-card-title></v-card-title>
+                                <template v-slot:placeholder>
+                                    <div class="d-flex align-center justify-center fill-height">
+                                        <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
+                                    </div>
+                                </template>
                             </v-img>
                         </div>
                         <div class="  align-center pa-4">
                             <h4 class="">{{ item.menuName }}</h4>
                             <div class=" text-grey-lighten-1 text-caption">Tasty & Crispy Spare Ribs</div>
                             <h5 class="my-2">Php {{ item.menuPrice }}</h5>
-                            <v-btn class="mt-1 text-subtitle-2" density="comfortable" prepend-icon="mdi-cart" color="amber"
-                                variant="outlined">Add to order</v-btn>
+                            <v-btn @click="AddToCart(item)" class="mt-1 text-subtitle-2" density="comfortable"
+                                prepend-icon="mdi-cart" color="amber" variant="outlined">Add to order</v-btn>
                         </div>
                     </v-card>
+
                 </v-col>
             </v-row>
         </v-container>
@@ -108,26 +128,34 @@
         </div>
         <v-container>
             <v-row justify="center" align="center" class="">
-                <v-col cols="12" sm="6" md="4" v-for="item in data.PA" :key="item.menuCode">
-                    <v-card class="menu-card  align-center d-flex flex-row ">
-                        <div>
+                <v-col cols="12" sm="6" md="4" v-for="item in data.PA" :key="item.menuCode"
+                    style="position: relative !important;">
+                    <v-img v-if="item.isHot" class="best-seller" src="@/assets/best-seller.png" width="120" cover></v-img>
+                    <v-card class="menu-card  menu-card align-center d-flex flex-row ">
+                        <div @click="dialog = true">
                             <v-img class="align-end text-white " aspect-ratio="1" height="170" width="170" cover
                                 :src="item.img">
-                                <v-card-title></v-card-title>
+                                <template v-slot:placeholder>
+                                    <div class="d-flex align-center justify-center fill-height">
+                                        <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
+                                    </div>
+                                </template>
                             </v-img>
                         </div>
                         <div class="  align-center pa-4">
                             <h4 class="">{{ item.menuName }}</h4>
                             <div class=" text-grey-lighten-1 text-caption">Tasty & Crispy Spare Ribs</div>
                             <h5 class="my-2">Php {{ item.menuPrice }}</h5>
-                            <v-btn class="mt-1 text-subtitle-2" density="comfortable" prepend-icon="mdi-cart" color="amber"
-                                variant="outlined">Add to order</v-btn>
+                            <v-btn @click="AddToCart(item)" class="mt-1 text-subtitle-2" density="comfortable"
+                                prepend-icon="mdi-cart" color="amber" variant="outlined">Add to order</v-btn>
                         </div>
                     </v-card>
+
                 </v-col>
             </v-row>
         </v-container>
         <!-- end -->
+
         <!-- Vegetable Dishes -->
         <div id="vegetable" class=" div2nd my-5 px-5 mt-12" style=" text-align: center;">
             <div class="text-body-1 font-weight-bold d-inline bg-red-accent-4 py-1 px-3 header-red ">
@@ -140,26 +168,33 @@
         </div>
         <v-container>
             <v-row justify="center" align="center" class="">
-                <v-col cols="12" sm="6" md="4" v-for="item in data.VE" :key="item.menuCode">
-                    <v-card class="menu-card  align-center d-flex flex-row ">
-                        <div>
+                <v-col cols="12" sm="6" md="4" v-for="item in data.VE" :key="item.menuCode"
+                    style="position: relative !important;">
+                    <v-img v-if="item.isHot" class="best-seller" src="@/assets/best-seller.png" width="120" cover></v-img>
+                    <v-card class="menu-card  menu-card align-center d-flex flex-row ">
+                        <div @click="dialog = true">
                             <v-img class="align-end text-white " aspect-ratio="1" height="170" width="170" cover
                                 :src="item.img">
-                                <v-card-title></v-card-title>
+                                <template v-slot:placeholder>
+                                    <div class="d-flex align-center justify-center fill-height">
+                                        <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
+                                    </div>
+                                </template>
                             </v-img>
                         </div>
                         <div class="  align-center pa-4">
                             <h4 class="">{{ item.menuName }}</h4>
                             <div class=" text-grey-lighten-1 text-caption">Tasty & Crispy Spare Ribs</div>
                             <h5 class="my-2">Php {{ item.menuPrice }}</h5>
-                            <v-btn class="mt-1 text-subtitle-2" density="comfortable" prepend-icon="mdi-cart" color="amber"
-                                variant="outlined">Add to order</v-btn>
+                            <v-btn @click="AddToCart(item)" class="mt-1 text-subtitle-2" density="comfortable"
+                                prepend-icon="mdi-cart" color="amber" variant="outlined">Add to order</v-btn>
                         </div>
                     </v-card>
                 </v-col>
             </v-row>
         </v-container>
         <!-- end -->
+
         <!-- Dessert Dishes -->
         <div id="dessert" class=" div2nd my-5 px-5 mt-12" style=" text-align: center;">
             <div class="text-body-1 font-weight-bold d-inline bg-red-accent-4 py-1 px-3 header-red ">
@@ -172,26 +207,33 @@
         </div>
         <v-container>
             <v-row justify="center" align="center" class="">
-                <v-col cols="12" sm="6" md="4" v-for="item in data.MC" :key="item.menuCode">
-                    <v-card class="menu-card  align-center d-flex flex-row ">
-                        <div>
+                <v-col cols="12" sm="6" md="4" v-for="item in data.MC" :key="item.menuCode"
+                    style="position: relative !important;">
+                    <v-img v-if="item.isHot" class="best-seller" src="@/assets/best-seller.png" width="120" cover></v-img>
+                    <v-card class="menu-card  menu-card align-center d-flex flex-row ">
+                        <div @click="dialog = true">
                             <v-img class="align-end text-white " aspect-ratio="1" height="170" width="170" cover
                                 :src="item.img">
-                                <v-card-title></v-card-title>
+                                <template v-slot:placeholder>
+                                    <div class="d-flex align-center justify-center fill-height">
+                                        <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
+                                    </div>
+                                </template>
                             </v-img>
                         </div>
                         <div class="  align-center pa-4">
                             <h4 class="">{{ item.menuName }}</h4>
                             <div class=" text-grey-lighten-1 text-caption">Tasty & Crispy Spare Ribs</div>
                             <h5 class="my-2">Php {{ item.menuPrice }}</h5>
-                            <v-btn class="mt-1 text-subtitle-2" density="comfortable" prepend-icon="mdi-cart" color="amber"
-                                variant="outlined">Add to order</v-btn>
+                            <v-btn @click="AddToCart(item)" class="mt-1 text-subtitle-2" density="comfortable"
+                                prepend-icon="mdi-cart" color="amber" variant="outlined">Add to order</v-btn>
                         </div>
                     </v-card>
                 </v-col>
             </v-row>
         </v-container>
         <!-- end -->
+
         <!-- Seafood Dishes -->
         <div id="seafood" class=" div2nd my-5 px-5 mt-12" style=" text-align: center;">
             <div class="text-body-1 font-weight-bold d-inline bg-red-accent-4 py-1 px-3 header-red ">
@@ -204,84 +246,107 @@
         </div>
         <v-container>
             <v-row justify="center" align="center" class="">
-                <v-col cols="12" sm="6" md="4" v-for="item in data.SF" :key="item.menuCode">
-                    <v-card class="menu-card  align-center d-flex flex-row ">
-                        <div>
+                <v-col cols="12" sm="6" md="4" v-for="item in data.SF" :key="item.menuCode"
+                    style="position: relative !important;">
+                    <v-img v-if="item.isHot" class="best-seller" src="@/assets/best-seller.png" width="120" cover></v-img>
+                    <v-card class="menu-card  menu-card align-center d-flex flex-row ">
+                        <div @click="dialog = true">
                             <v-img class="align-end text-white " aspect-ratio="1" height="170" width="170" cover
                                 :src="item.img">
-                                <v-card-title></v-card-title>
+                                <template v-slot:placeholder>
+                                    <div class="d-flex align-center justify-center fill-height">
+                                        <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
+                                    </div>
+                                </template>
                             </v-img>
                         </div>
                         <div class="  align-center pa-4">
                             <h4 class="">{{ item.menuName }}</h4>
                             <div class=" text-grey-lighten-1 text-caption">Tasty & Crispy Spare Ribs</div>
                             <h5 class="my-2">Php {{ item.menuPrice }}</h5>
-                            <v-btn class="mt-1 text-subtitle-2" density="comfortable" prepend-icon="mdi-cart" color="amber"
-                                variant="outlined">Add to order</v-btn>
+                            <v-btn @click="AddToCart(item)" class="mt-1 text-subtitle-2" density="comfortable"
+                                prepend-icon="mdi-cart" color="amber" variant="outlined">Add to order</v-btn>
                         </div>
                     </v-card>
                 </v-col>
             </v-row>
         </v-container>
         <!-- end -->
-        <v-snackbar v-model="snackbar" :timeout="timeout" color="grey-darken-4">
-            An item has been added to your Order.
 
-            <template v-slot:actions>
-                <router-link class="" style="text-decoration: none !important" :to="{ name: 'Order' }">
-                    <v-btn density="comfortable" color="blue" variant="outlined" @click="OpenCart">
-                        View Orders
-                    </v-btn>
-                </router-link>
-            </template>
-        </v-snackbar>
-
-        <div class=" btm-fix d-flex justify-space-around py-2 bg-black">
-            <div @click="navigateTo('pork')" class="fixed-icons d-flex flex-column align-center">
-                <v-icon icon="mdi-pig"></v-icon>
-                <small class="text-caption">Pork</small>
-            </div>
-            <div @click="navigateTo('chicken')" class="fixed-icons d-flex flex-column align-center">
-                <v-icon icon="mdi-food-turkey"></v-icon>
-                <small class="text-caption">Chicken</small>
-            </div>
-            <div @click="navigateTo('pasta')" class="fixed-icons d-flex flex-column align-center">
-                <v-icon icon="mdi-noodles"></v-icon>
-                <small class="text-caption">Pasta</small>
-            </div>
-            <div @click="navigateTo('vegetable')" class="fixed-icons d-flex flex-column align-center">
-                <v-icon icon="mdi-leaf-circle"></v-icon>
-                <small class="text-caption">Veges</small>
-            </div>
-            <div @click="navigateTo('dessert')" class="fixed-icons d-flex flex-column align-center">
-                <v-icon icon="mdi-cake-variant"></v-icon>
-                <small class="text-caption">Dessert</small>
-            </div>
-            <div @click="navigateTo('seafood')" class="fixed-icons d-flex flex-column align-center">
-                <v-icon icon="mdi-fish"></v-icon>
-                <small class="text-caption">Seafood</small>
+        
+        <div class=" btm-fix  py-2 bg-black" style="z-index: 1;">
+            
+            <div class="d-flex justify-space-around mx-auto " style="max-width: 500px;">
+                <div @click="navigateTo('pork'); selectedCategory = 1 " class="fixed-icons d-flex flex-column align-center"
+                :class="{ active: selectedCategory === 1 }"
+                >
+                    <v-icon icon="mdi-pig"></v-icon>
+                    <small class="text-caption">Pork</small>
+                </div>
+                <div @click="navigateTo('chicken');selectedCategory = 2 " class="fixed-icons d-flex flex-column align-center"
+                :class="{ active: selectedCategory === 2 }">
+                    <v-icon icon="mdi-food-turkey"></v-icon>
+                    <small class="text-caption">Chicken</small>
+                </div>
+                <div @click="navigateTo('pasta'); selectedCategory = 3" class="fixed-icons d-flex flex-column align-center"
+                :class="{ active: selectedCategory === 3 }">
+                    <v-icon icon="mdi-noodles"></v-icon>
+                    <small class="text-caption">Pasta</small>
+                </div>
+                <div @click="navigateTo('vegetable');selectedCategory = 4 " class="fixed-icons d-flex flex-column align-center"
+                :class="{ active: selectedCategory === 4 }">
+                    <v-icon icon="mdi-leaf-circle"></v-icon>
+                    <small class="text-caption">Veges</small>
+                </div>
+                <div @click="navigateTo('dessert'); selectedCategory = 5" class="fixed-icons d-flex flex-column align-center"
+                :class="{ active: selectedCategory === 5 }">
+                    <v-icon icon="mdi-cake-variant"></v-icon>
+                    <small class="text-caption">Dessert</small>
+                </div>
+                <div @click="navigateTo('seafood'); selectedCategory = 6" class="fixed-icons d-flex flex-column align-center"
+                :class="{ active: selectedCategory === 6 }">
+                    <v-icon icon="mdi-fish"></v-icon>
+                    <small class="text-caption">Seafood</small>
+                </div>
             </div>
         </div>
     </div>
 
+
     <div class="text-center">
         <v-dialog v-model="dialog" class="pa-0" max-width="500" max-height="600">
             <v-card>
-                <v-img class="align-end text-white " aspect-ratio="1" cover :src="img">
-                    <v-card-title></v-card-title>
-                </v-img>
+                <v-img class="align-end text-white " aspect-ratio="1" cover :src="img" />
                 <v-card-actions>
                     <v-btn prepend-icon="mdi-close" color="primary" block @click="dialog = false">Close</v-btn>
                 </v-card-actions>
             </v-card>
         </v-dialog>
     </div>
+
+
 </template>
 
 <script setup>
-import { ref, getCurrentInstance, onMounted, inject } from 'vue'
+// Download image utility
+function downloadImage(url, name) {
+  fetch(url)
+    .then(response => response.blob())
+    .then(blob => {
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = name ? `${name}.jpg` : 'image.jpg';
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => {
+        URL.revokeObjectURL(link.href);
+        document.body.removeChild(link);
+      }, 100);
+    });
+}
+import { ref, computed, getCurrentInstance, onMounted, inject } from 'vue'
 // import { collection, getDocs } from "firebase/firestore";
-import { ref as fireRef, child, get } from "firebase/database";
+import { ref as fireRef, child, get, query, orderByChild, equalTo } from "firebase/database";
 import { ref as refS, getDownloadURL } from "firebase/storage";
 import { db, storage } from '@/firebase'
 import 'vue-skeletor/dist/vue-skeletor.css';
@@ -289,8 +354,8 @@ import { Skeletor } from 'vue-skeletor';
 
 const internalInstance = getCurrentInstance()
 const img = ref(null);
-let snackbar = ref(false);
 const dialog = ref(false);
+const selectedCategory = ref(null);
 const fetching = ref(true);
 const timeout = ref(10000);
 const data = ref({});
@@ -299,15 +364,12 @@ const emitter = inject('emitter');
 const smoothScroll = inject('smoothScroll');
 
 function AddToCart(val) {
-
     internalInstance.appContext.config.globalProperties.gVar.items[val.menuCode] = val
-    this.snackbar = true
     emitter.emit('add-per-menu', 1);
 }
 function OpenCart() {
     // emitter.emit('add-permenu-items', items);
 
-    snackbar = false
 }
 function navigateTo(val) {
     const myEl = document.getElementById(val)
@@ -319,12 +381,32 @@ function navigateTo(val) {
 }
 onMounted(async () => {
 
-    const dbRef = fireRef(db);
-    get(child(dbRef, `MenuCategory/`)).then((snapshot) => {
-        data.value = snapshot.val()
-        console.log(data);
-        fetching.value = false
-    })
+    const selectedBranch = localStorage.getItem('selectedBranch') || 'naga';
+
+    const dbRef = fireRef(db, 'MenuCategory');
+    
+    get(dbRef).then((snapshot) => {
+        const allData = snapshot.val();
+        const filteredData = {};
+
+        for (const category in allData) {
+            const categoryItems = allData[category];
+            const filteredItems = {};
+            for (const key in categoryItems) {
+                if (Array.isArray(categoryItems[key].branches) && categoryItems[key].branches.includes(selectedBranch)) {
+                    filteredItems[key] = categoryItems[key];
+                }
+            }
+            if(Object.keys(filteredItems).length > 0){
+                 filteredData[category] = filteredItems;
+            }
+        }
+        data.value = filteredData;
+        fetching.value = false;
+    }).catch((error) => {
+        console.error(error);
+        fetching.value = false;
+    });
 
 
     const imagesRef = refS(storage, 'img/IMG_20220420_133639.jpg');
@@ -332,97 +414,196 @@ onMounted(async () => {
         .then((url) => {
             img.value = url
         })
-});
 
+    window.scrollTo(0, 0)
+});
+// Remove filteredData and branchDialog logic
 // function trigger(){
 //     this.emitter.emit('update', 1)
 // }
 </script>
 
-<style lang="scss" scoped>
-.banner-img {
-    background-size: cover;
-    background-image: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url(https://firebasestorage.googleapis.com/v0/b/postres-c30e4.appspot.com/o/img%2FIMG_20220420_133639.jpg?alt=media&token=bc565fbc-7776-4c8d-90c4-604d758e767a);
+<style scoped>
+/* Download button */
+.download-btn {
+  border-radius: 50% !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  width: 32px !important;
+  height: 32px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  transition: background 0.2s, color 0.2s;
+  z-index: 2;
+}
+.download-btn:hover {
+  background: #ff1744 !important;
+  color: #fff !important;
 }
 
+/* Banner image */
+.banner-img {
+  background-size: cover;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url(https://firebasestorage.googleapis.com/v0/b/postres-c30e4.appspot.com/o/img%2FIMG_20220420_133639.jpg?alt=media&token=bc565fbc-7776-4c8d-90c4-604d758e767a);
+}
+
+/* Section header */
 .div2nd {
-    padding-bottom: 0;
-    margin-top: 2rem;
-    margin-bottom: 2rem;
-
-    H3 {
-        display: inline;
-        background-color: #ED0000;
-
-    }
-
-    h1 {
-        margin-top: 1rem;
-        margin-bottom: 1rem;
-
-    }
+  padding-bottom: 0;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+.div2ndh3 {
+  display: inline;
+  background-color: #ED0000;
+}
+.div2ndh1 {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
 
 .text-h2 {
-    font-family: 'Satisfy', helvetica !important;
+  font-family: 'Satisfy', helvetica !important;
 }
 
 .header-red {
-    font-family: 'Montserrat' !important;
-    font-weight: 600;
+  font-family: 'Montserrat' !important;
+  font-weight: 600;
 }
 
+/* Bottom fixed bar */
 .btm-fix {
-    position: fixed;
-    width: 100%;
-    bottom: 0;
-
-    .fixed-icons {
-        color: #AAAAAA;
-        transition: ease all .5s;
-        cursor: pointer;
-        max-width: 100px !important;
-
-        &:hover {
-            animation: shake 0.5s;
-            color: white;
-        }
-    }
+  position: fixed;
+  width: 100%;
+  bottom: 0;
+}
+.fixed-icons {
+  color: #AAAAAA;
+  transition: ease all .5s;
+  cursor: pointer;
+  max-width: 100px !important;
+}
+.fixed-icons.active {
+  color: rgb(250, 185, 8) !important;
 }
 
+/* Menu card */
 .menu-card {
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-    cursor: pointer;
-    transition: all ease 0.3s;
-
-    &:hover {
-        box-shadow: rgba(121, 188, 243, 0.35) 0px 5px 15px;
-    }
-
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  cursor: pointer;
+  transition: all ease 0.3s;
+}
+.menu-card-hover {
+  box-shadow: rgba(121, 188, 243, 0.35) 0px 5px 15px;
 }
 
 @keyframes shake {
-    0% {
-        transform: translate(1px, 1px) rotate(0deg);
-    }
+  0% {
+    transform: translate(1px, 1px) rotate(0deg);
+  }
+  20% {
+    transform: translate(-3px, 0px) rotate(1deg);
+  }
+  40% {
+    transform: translate(1px, -1px) rotate(1deg);
+  }
+  60% {
+    transform: translate(-3px, 1px) rotate(0deg);
+  }
+  80% {
+    transform: translate(-1px, -1px) rotate(1deg);
+  }
+  100% {
+    transform: translate(1px, -2px) rotate(-1deg);
+  }
+}
 
-    20% {
-        transform: translate(-3px, 0px) rotate(1deg);
-    }
+.best-seller {
+  position: absolute !important;
+  top: 4px;
+  left: 4px;
+  z-index: 1 !important;
+}
+</style>
+}
 
-    40% {
-        transform: translate(1px, -1px) rotate(1deg);
-    }
-
-    60% {
-        transform: translate(-3px, 1px) rotate(0deg);
-    }
-
-    80% {
-        transform: translate(-1px, -1px) rotate(1deg);
-    }
-
-    100% {
-        transform: translate(1px, -2px) rotate(-1deg);
-    }
-}</style>
+/* --- CSS Styles for Menu.vue --- */
+<style scoped>
+.download-btn {
+  border-radius: 50% !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  width: 32px !important;
+  height: 32px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  transition: background 0.2s, color 0.2s;
+  z-index: 2;
+}
+.download-btn:hover {
+  background: #ff1744 !important;
+  color: #fff !important;
+}
+.banner-img {
+  background-size: cover;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url(https://firebasestorage.googleapis.com/v0/b/postres-c30e4.appspot.com/o/img%2FIMG_20220420_133639.jpg?alt=media&token=bc565fbc-7776-4c8d-90c4-604d758e767a);
+}
+.div2nd {
+  padding-bottom: 0;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+.div2nd h3 {
+  display: inline;
+  background-color: #ED0000;
+}
+.div2nd h1 {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+.text-h2 {
+  font-family: 'Satisfy', helvetica !important;
+}
+.header-red {
+  font-family: 'Montserrat' !important;
+  font-weight: 600;
+}
+.btm-fix {
+  position: fixed;
+  width: 100%;
+  bottom: 0;
+}
+.fixed-icons {
+  color: #AAAAAA;
+  transition: ease all .5s;
+  cursor: pointer;
+  max-width: 100px !important;
+}
+.fixed-icons:hover {
+  animation: shake 0.5s;
+  color: white;
+}
+.menu-card {
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  cursor: pointer;
+  transition: all ease 0.3s;
+}
+.menu-card:hover {
+  box-shadow: rgba(121, 188, 243, 0.35) 0px 5px 15px;
+}
+@keyframes shake {
+  0% { transform: translate(1px, 1px) rotate(0deg); }
+  20% { transform: translate(-3px, 0px) rotate(1deg); }
+  40% { transform: translate(1px, -1px) rotate(1deg); }
+  60% { transform: translate(-3px, 1px) rotate(0deg); }
+  80% { transform: translate(-1px, -1px) rotate(1deg); }
+  100% { transform: translate(1px, -2px) rotate(-1deg); }
+}
+.best-seller {
+  position: absolute !important;
+  top: 4px;
+  left: 4px;
+  z-index: 1 !important;
+}
+.active {
+  color: rgb(250, 185, 8) !important;
+}
+</style>

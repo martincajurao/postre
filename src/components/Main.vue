@@ -1,6 +1,7 @@
 <template>
   <div class="mainWrap">
     <div ref="home"></div>
+    <!-- Branch Selector Dialog -->
     <v-container fluid class="wrapper">
       <v-row class="align-center text-left banner">
         <div v-el:home class="content">
@@ -9,14 +10,14 @@
           </div>
           <h1 class="text-h1  pt-5">Postre's</h1>
           <h2 class="text-h3 ">Crepe de Mango</h2>
-          <v-btn class="mt-8 px-6 btnMenu " height="50" color="red-accent-4" rounded="0" variant="flat"
-            prepend-icon="mdi-view-carousel">
-            OUR MENU
-          </v-btn>
+          <router-link :to="{ name: 'Menu' }" class="router-menu-link">
+            <v-btn  class="mt-8 px-6 btnMenu " height="50" color="red-accent-4" rounded="0" variant="flat"
+              prepend-icon="mdi-view-carousel">
+              OUR MENU
+            </v-btn>
+          </router-link>
         </div>
       </v-row>
-
-
 
       <div class="div2nd px-5 py-3" style=" text-align: center;">
         <div class="text-body-1  d-inline bg-red-accent-4 py-1 px-3 header-red ">
@@ -28,8 +29,8 @@
         </p>
       </div>
 
-
       <Combo :data = data />
+      <Location ref="locationRef" />
       <div ref="about" class="div2nd px-5 py-3 w-75 mx-auto" style=" text-align: center;">
         <div class="text-body-1  d-inline bg-red-accent-4 py-1 px-3 header-red ">
           ABOUT US
@@ -40,40 +41,74 @@
           delectus architecto nemo! Exercitationem, nulla velit?
         </p>
       </div>
-
     </v-container>
-
-    <div ref="location"></div>
+    <!-- removed unused location div -->
   </div>
 </template>
 
 <script setup>
 
-import Combo from '@/components/Combo.vue'
-import { ref, onMounted, getCurrentInstance } from 'vue'
+import { ref, onMounted, getCurrentInstance, computed, inject, nextTick, provide } from 'vue';
 import { ref as fireRef, getDatabase, child, get, set, query, orderByChild, orderByValue, limitToFirst } from "firebase/database";
 import { ref as strRef, getDownloadURL, uploadBytes } from "firebase/storage";
-import { db, storage } from '@/firebase'
+import { db, storage } from '@/firebase';
+import Combo from '@/components/Combo.vue';
+import Location from '@/components/Location.vue';
 
+const home = ref(null);
 const offer = ref(null);
 const about = ref(null);
-const location = ref(null);
+const locationRef = ref(null);
 const data = ref(null)
 const imgPreview = ref(false)
-const internalInstance = getCurrentInstance()
+const internalInstance = getCurrentInstance();
+
+const emitter = inject('emitter');
+
+
+const selectedBranch = ref(localStorage.getItem('selectedBranch') || 'naga');
+
+function fetchDataForBranch() {
+  if (!selectedBranch.value) return;
+  const que = query(fireRef(db, 'Combo'));
+  get(que).then((snapshot) => {
+    const allData = snapshot.val();
+    if (allData && typeof allData === 'object') {
+      const filtered = Object.fromEntries(
+        Object.entries(allData).filter(([k, v]) => Array.isArray(v.branches) && v.branches.includes(selectedBranch.value))
+      );
+      data.value = filtered;
+    } else {
+      data.value = allData;
+    }
+  });
+}
+
 
 onMounted(() => {
-  internalInstance.appContext.config.globalProperties.gVar.offer = offer.value;
-  internalInstance.appContext.config.globalProperties.gVar.about = about.value;
-  internalInstance.appContext.config.globalProperties.gVar.location = location.value;
+  const $smoothScroll = getCurrentInstance()?.proxy?.$smoothScroll;
 
-  const que = query(fireRef(db, 'Combo'));
+  emitter.on('scroll-to', (refName) => {
+    let element;
+    if (refName === 'home') element = home.value;
+    if (refName === 'offer') element = offer.value;
+    if (refName === 'about') element = about.value;
+    if (refName === 'location') element = locationRef.value?.$el;
 
-  get(que).then((snapshot) => {
+    if (element && $smoothScroll) {
+      $smoothScroll({
+        scrollTo: element,
+        behavior: 'smooth',
+      });
+    }
+  });
 
-    data.value = snapshot.val()
-  })
-})
+  // Only fetch data if a branch is already selected from a previous session
+  if (selectedBranch.value) {
+    fetchDataForBranch();
+  }
+});
+
 function ShowmenuImg(val) {
   alert(val)
 }
@@ -89,9 +124,39 @@ function ShowmenuImg(val) {
 
 </script>
 <style lang="scss" scoped>
+
+
+.branch-switch-btn-bar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+  padding: 0.5rem 1.5rem 0.5rem 0;
+  background: transparent;
+  z-index: 1001;
+}
+.router-menu-link {
+  text-decoration: none;
+}
+.branch-switch-btn {
+  transition: box-shadow 0.2s, background 0.2s;
+  background: #1976d2 !important;
+  color: #fff !important;
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border-radius: 24px;
+  min-width: 180px;
+  &:hover {
+    background: #1565c0 !important;
+    color: #fff !important;
+    box-shadow: 0 4px 16px rgba(25, 118, 210, 0.18);
+  }
+}
+
+
 .wrapper {
   padding: 0;
-
 }
 
 .rowCategory {
@@ -100,7 +165,6 @@ function ShowmenuImg(val) {
 }
 
 .banner {
-
   width: 100%;
   margin: 0;
   height: 100vh;
@@ -111,7 +175,6 @@ function ShowmenuImg(val) {
 .content {
   width: 90%;
   margin: auto;
-
 }
 
 .btnMenu {
@@ -143,17 +206,15 @@ function ShowmenuImg(val) {
   padding-bottom: 0;
   margin-top: 2rem;
   margin-bottom: 2rem;
-
-  H3 {
-    display: inline;
-    background-color: #F79F00;
-    padding: .5rem;
-  }
-
-  h1 {
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-  }
+}
+.div2nd H3 {
+  display: inline;
+  background-color: #F79F00;
+  padding: .5rem;
+}
+.div2nd h1 {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
 
 .text-h1 {

@@ -22,14 +22,23 @@
                 <li> <router-link @click="setActive(5, 'about')" class="link"
                         :class="{ 'clickedActive': activeTab === 5 ? 'clickedActive' : '' }" :to="{ name: 'Home' }">About
                         Us</router-link></li>
-                <router-link @click="setActive(0)"  :to="{ name: 'Order' }">
-                    <v-badge v-show="cartItems > 0" class="ml-4 text-grey-lighten-2" style="cursor: pointer;"
-                        :content="cartItems" color="red">
-                        <v-icon x-large>mdi-cart-variant</v-icon>
-                    </v-badge>
-                </router-link>
+          
 
             </ul>
+             <div class="branch-selector-wrapper">
+               <v-select
+                 v-model="selectedBranch"
+                 :items="branches"
+                 item-title="name"
+                 item-value="id"
+                 label="Location"
+                 dense
+                 variant="outlined"
+                 hide-details
+                 class="branch-selector"
+                 @update:modelValue="onBranchChanged"
+               ></v-select>
+             </div>
             <div class="icon">
                 <router-link v-show="mobile" @click="setActive(0)" class="mr-4 mt-2"  :to="{ name: 'Order' }">
                     <v-badge v-show="cartItems > 0" class="ml-4 text-grey-lighten-2" style="cursor: pointer;"
@@ -74,92 +83,101 @@
 </header>
 </template>
 
-<script >
-import { inject } from 'vue'
-export default {
+<script setup>
+import { inject, ref, computed, onMounted, onBeforeUnmount, getCurrentInstance, reactive } from 'vue'
 
-    name: "navigation",
-    data() {
-        return {
-            scrollPosition: null,
-            mobile: null,
-            mobileNav: null,
-            activeTab: false,
-            windowWidth: null,
-            cartItems: 0
-        }
-    },
-    created() {
-        window.addEventListener('resize', this.checkScreen);
-        this.checkScreen()
-    },
-    mounted() {
-        window.addEventListener('scroll', this.updateScroll);
+const scrollPosition = ref(null)
+const mobile = ref(null)
+const mobileNav = ref(null)
+const activeTab = ref(false)
+const windowWidth = ref(null)
+const cart = reactive({ items: 0 })
+const branches = ref([
+  { id: 'naga', name: 'Naga' },
+  { id: 'calbayog', name: 'Calbayog' },
+]);
+const selectedBranch = ref(localStorage.getItem('selectedBranch') || 'naga');
 
-        const emitter = inject('emitter');   // Inject `emitter`
-
-        emitter.on('add-per-menu', (value) => {   // *Listen* for event
-            this.cartItems += value
-        });
-        emitter.on('remove', (value) => {   // *Listen* for event
-            this.cartItems -= value
-        });
-    },
-    methods: {
-        toggleMobileNav() {
-            this.mobileNav = !this.mobileNav
-        },
-        setActive(val, refName) {
-            this.activeTab = val
-
-            if (refName == "home") {
-                this.$smoothScroll({
-                    scrollTo: this.gVar.home,
-                })
-            } else if (refName == "offer") {
-                this.$smoothScroll({
-                    scrollTo: this.gVar.offer,
-                })
-            } else if (refName == "location") {
-                this.$smoothScroll({
-                    scrollTo: this.gVar.location,
-                })
-            } else if (refName == "about") {
-                this.$smoothScroll({
-                    scrollTo: this.gVar.about,
-                })
-            } else if (refName == "menu") {
-                this.$smoothScroll({
-                    scrollTo: 0,
-                })
-            }
-            this.mobileNav = false
-
-        },
-        checkScreen() {
-            this.windowWidth = window.innerWidth
-            if (this.windowWidth <= 750) {
-                this.mobile = true
-                return
-            }
-            this.mobile = false
-            this.mobileNav = false
-            return
-        },
-        updateScroll() {
-            const scrollPosition = window.scrollY;
-            if (scrollPosition > 50) {
-                this.scrollPosition = true;
-                return
-            }
-            this.scrollPosition = false;
-        },
-
-
-    }
+function onBranchChanged(newBranch) {
+  localStorage.setItem('selectedBranch', newBranch);
+  // refresh the page to reflect changes
+  window.location.reload();
 }
+ 
+ function checkScreen() {
+  windowWidth.value = window.innerWidth
+  if (windowWidth.value <= 750) {
+    mobile.value = true
+    return
+  }
+  mobile.value = false
+  mobileNav.value = false
+  return
+}
+
+function updateScroll() {
+  const pos = window.scrollY
+  if (pos > 50) {
+    scrollPosition.value = true
+    return
+  }
+  scrollPosition.value = false
+}
+
+function toggleMobileNav() {
+  mobileNav.value = !mobileNav.value
+}
+
+const emitter = inject('emitter');
+
+function setActive(val, refName) {
+  activeTab.value = val;
+  if (refName) {
+    emitter.emit('scroll-to', refName);
+  }
+  mobileNav.value = false;
+}
+
+const cartItems = computed(() => cart.items)
+
+onMounted(() => {
+  window.addEventListener('resize', checkScreen)
+  window.addEventListener('scroll', updateScroll)
+  checkScreen()
+  // Sync cartItems to global for FloatingCart
+  const internalInstance = getCurrentInstance();
+  if (internalInstance) {
+    internalInstance.appContext.config.globalProperties.cartItemsRef = cart
+  }
+  const emitter = inject('emitter')
+  if (emitter) {
+    emitter.on('add-per-menu', (value) => {
+      cart.items += value
+    })
+    emitter.on('remove', (value) => {
+      cart.items -= value
+    })
+  }
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', checkScreen)
+  window.removeEventListener('scroll', updateScroll)
+})
 </script>
 <style lang="scss" scoped>
+.branch-selector-wrapper {
+  display: flex;
+  align-items: center;
+  margin-left: 20px;
+}
+.branch-selector {
+    min-width: 150px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    color: white;
+}
+
 .mdi-menu {
     transition: .8s ease all;
     ;

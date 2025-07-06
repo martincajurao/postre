@@ -13,6 +13,17 @@
         </v-img>
     </v-container>
     <v-container :key="updateKey" class="mt-0 pt-0">
+        <!-- Floating Menu Button -->
+        <v-btn
+            class="floating-menu-btn"
+            color="red-accent-4"
+            fab
+            large
+            style="position: fixed; bottom: 32px; right: 32px; z-index: 1001; box-shadow: 0 4px 24px rgba(0,0,0,0.25);"
+            @click="router.push({ name: 'Menu' })"
+        >
+            <v-icon size="36">mdi-silverware-fork-knife</v-icon>
+        </v-btn>
         <v-row class="checkout  ">
             <v-col class="" cols="12" sm="8" style="background-color: 0E0E10;">
                 <!-- <v-responsive style="background-color: #0E0E10;" class="px-5 pt-4 my-4">
@@ -42,19 +53,20 @@
                             <div class="d-flex align-center justify-space-between">
                                 <!-- <v-checkbox :label="item.desc" class="text-body-2 d-inline-flex font-weight-bold">
                             </v-checkbox> -->
-                                <div class="font-weight-bold text-grey mt-4 my-2">{{ item.desc }} 
+                                <div class="font-weight-bold text-grey mt-4 my-2">{{ item.desc }}
                                     <v-chip size="small" color="amber">
-                                        &#8369;{{  (Object.values(item.members).reduce((s, a) => s + parseFloat(a.menuPrice), 0) - item.disc).toLocaleString() }}
+                                        &#8369;{{ (Object.values(item.members).reduce((s, a) => s + parseFloat(a.menuPrice),
+                                            0) - item.disc).toLocaleString() }}
                                     </v-chip>
                                 </div>
-                                <div>{{ }}</div>
                                 <div class="text-body-2 text-green-accent-4"> Less &#8369;{{
-                                    item.disc.toLocaleString("En") }}</div>
+                                    item.disc.toLocaleString("En") }}
+                                </div>
                                 <v-btn @click="emitter.emit('remove', 1); delete combo[item.name]" density="comfortable"
                                     variant="text" size="small" icon="mdi-delete-empty"></v-btn>
                             </div>
                             <div v-for="menuitem, selectedkey in item.members">
-                                <Item :data="menuitem" :isCombo="true" :selectedCombo = item :selectedkey = selectedkey />
+                                <Item :data="menuitem" :isCombo="true" :selectedCombo=item :selectedkey=selectedkey />
                             </div>
                         </div>
                     </TransitionGroup>
@@ -65,8 +77,9 @@
                         <v-spacer></v-spacer>
                         <v-btn @click="OpenMenu(); menudialog = true" variant="flat" class="mr-2" size="small"
                             density="comfortable" icon> <v-icon>mdi-plus</v-icon> </v-btn>
-                        <v-btn @click="emitter.emit('remove', Object.keys(items).length); items = {};" variant="flat"
-                            size="small" density="comfortable" icon> <v-icon>mdi-delete-empty</v-icon> </v-btn>
+                        <v-btn @click="emitter.emit('remove', Object.keys(items).length); items = {}; gVar.items = {}"
+                            variant="flat" size="small" density="comfortable" icon> <v-icon>mdi-delete-empty</v-icon>
+                        </v-btn>
                     </div>
                     <!-- <v-checkbox @click="selectAll" v-model="allSelected">Select all</v-checkbox> -->
                     <TransitionGroup name="list" tag="ul">
@@ -117,7 +130,8 @@
                                 disc).toLocaleString('en-US') }}</td>
                         </tr>
                     </table>
-                    <v-btn to="Confirm" block="" color="red-accent-4" class="mt-6 font-weight-bold">Checkout</v-btn>
+                    <v-btn to="Confirm" @click="Checkout()" block="" color="red-accent-4"
+                        class="mt-6 font-weight-bold">Checkout</v-btn>
                 </v-responsive>
             </v-col>
         </v-row>
@@ -125,8 +139,8 @@
 
     <!-- MODAL -->
     <v-dialog v-model="dialog" fullscreen :scrim="false" transition="dialog-bottom-transition">
-        <v-card color="black">
-            <v-toolbar dark color="red-accent-4">
+        <v-card color="#111">
+            <v-toolbar dark color="#111">
                 <v-toolbar-title>Select Package</v-toolbar-title>
                 <v-spacer></v-spacer>
                 <v-btn icon dark @click="dialog = false">
@@ -136,9 +150,10 @@
             <Combo :data=data />
         </v-card>
     </v-dialog>
+  <!-- Floating Cart moved to App.vue for global visibility -->
 
     <!-- MODAL -->
-    <v-dialog max-width="800px"  v-model="changedialog" :scrim="false" transition="dialog-bottom-transition">
+    <v-dialog max-width="800px" v-model="changedialog" :scrim="false" transition="dialog-bottom-transition">
         <v-card color="#111">
             <v-toolbar color="#111">
                 <v-icon class="ml-4">mdi-swap-horizontal</v-icon>
@@ -148,17 +163,18 @@
                     <v-icon>mdi-close</v-icon>
                 </v-btn>
             </v-toolbar>
-            <v-container class="mb-4">
+            <v-container class="mb-4"> 
                 <v-row>
                     <v-col cols="12" sm="6" v-for="item in changeMenuData" class="">
                         <!-- <v-divider class="mb-5"></v-divider> -->
-                        <div class="d-flex align-center justify-end " style="max-width: 350px; margin: auto;" >
+                        <div class="d-flex align-center justify-end " style="max-width: 350px; margin: auto;">
                             <v-badge v-if="item.isHot" :content="'Hot'" color="red-accent-4" offset-x="6" offset-y="6">
                                 <v-avatar size="60px">
                                     <v-img alt="Avatar" :src="item.img" cover>
                                         <template v-slot:placeholder>
                                             <div class="d-flex align-center justify-center fill-height">
-                                                <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
+                                                <v-progress-circular color="grey-lighten-4"
+                                                    indeterminate></v-progress-circular>
                                             </div>
                                         </template>
                                     </v-img>
@@ -180,8 +196,9 @@
                             <v-spacer></v-spacer>
                             <div class="d-flex justify-end align-center" style="min-width: 90px;">
                                 <span>&#8369;</span>{{ Number(item.menuPrice).toLocaleString('en-US') }}
-                                <v-btn color="" @click=" changedialog = false; combo[selectedchange.combo].members[selectedchange.selectedkey] = item"
-                                     class="ml-2" size="small" density="comfortable" icon>
+                                <v-btn color=""
+                                    @click="changedialog = false; combo[selectedchange.combo].members[selectedchange.selectedkey] = item"
+                                    class="ml-2" size="small" density="comfortable" icon>
                                     <v-icon>mdi-cached</v-icon>
                                 </v-btn>
                             </div>
@@ -192,7 +209,7 @@
         </v-card>
     </v-dialog>
     <!-- MODAL -->
-    <v-dialog v-model="menudialog" fullscreen :scrim="false" scrollable="true" transition="dialog-bottom-transition">
+    <v-dialog v-model="menudialog" fullscreen :scrim="false" scrollable transition="dialog-bottom-transition">
         <v-card color="#111">
             <v-toolbar color="#111">
                 <v-btn @click="menudialog = false" icon>
@@ -271,7 +288,7 @@
                                         <small>{{ item.menuDesc }}</small>
                                     </div>
                                     <v-spacer></v-spacer>
-                                    <div>
+                                    <div class="d-flex justify-end" style="min-width: 100px;">
                                         <span>&#8369;</span>{{ Number(item.menuPrice).toLocaleString('en-US') }}
                                         <v-btn
                                             @click="items[item.menuCode] = item; menudialog = false; emitter.emit('add-per-menu', 1)"
@@ -283,7 +300,6 @@
                             </v-col>
                         </v-row>
                     </v-container>
-
                 </v-window-item>
             </v-window>
         </v-card>
@@ -291,15 +307,19 @@
 </template>
 <script setup>
 import { ref, onMounted, getCurrentInstance, inject, watch, computed } from 'vue'
-import { ref as fireRef, getDatabase, child, get, set, query, orderByChild, orderByValue, equalTo, limitToFirst } from "firebase/database";
+import { ref as fireRef, getDatabase, child, get, set, query, orderByChild, orderByValue, equalTo } from "firebase/database";
 import Item from '@/components/Items.vue'
 import Combo from '@/components/Combo.vue'
 import { db, storage } from '@/firebase'
 
+import { useRouter } from 'vue-router'
+const router = useRouter()
+
+
 const internalInstance = getCurrentInstance()
 const emitter = inject('emitter');
 const combo = ref({})
-const items = ref(internalInstance.appContext.config.globalProperties.gVar.items)
+const items = ref({})
 const itemsCount = ref(0)
 const df = ref(0);
 const disc = ref(0);
@@ -312,9 +332,9 @@ const menudialog = ref(false)
 const data = ref(null)
 const menuData = ref(null)
 const changeMenuData = ref({})
-const show = ref(true)
 const updateKey = ref(0)
 const tab = ref(null)
+const itemsArray = ref([])
 
 // const selecteditems = ref([])
 // const selected = ref([])
@@ -322,17 +342,15 @@ const tab = ref(null)
 
 const computedtotal = computed(() => {
     const keyup = updateKey.value
-    const values = Object.values(items.value);
-    permenusub.value = values.reduce((s, a) => s + parseFloat(a.menuPrice), 0);
-    itemsCount.value = values.reduce((s, a) => s + parseFloat(a.buyQty), 0);
+    permenusub.value = Object.values(items.value).reduce((s, a) => s + parseFloat(a.menuPrice), 0);
+    itemsCount.value = Object.values(items.value).reduce((s, a) => s + parseFloat(a.buyQty), 0);
 
     combosub.value = 0
     disc.value = 0
 
     for (const x in combo.value) {
         disc.value += parseFloat(combo.value[x].disc)
-        const values2 = Object.values(combo.value[x].members);
-        combosub.value += values2.reduce((s, a) => s + parseFloat(a.menuPrice), 0);
+        combosub.value += Object.values(combo.value[x].members).reduce((s, a) => s + parseFloat(a.menuPrice), 0);
     }
     return combosub.value + permenusub.value
 })
@@ -353,8 +371,10 @@ const computedtotal = computed(() => {
 
 onMounted(() => {
     combo.value = internalInstance.appContext.config.globalProperties.gVar.combo
+    items.value = internalInstance.appContext.config.globalProperties.gVar.items
     const que = query(fireRef(db, 'Combo'));
     const q = query(fireRef(db, 'MenuCategory'));
+    console.log('COMBO', combo.value)
 
     get(q).then((snapshot) => {
         menuData.value = snapshot.val()
@@ -373,8 +393,9 @@ onMounted(() => {
         updateKey.value += 1
     });
     emitter.on('add-qty', (val) => {   // *Listen* for event
+        console.log(val.buyQty)
         const i = parseFloat(val.menuPrice) / parseFloat(val.buyQty)
-        val['buyQty'] += 1
+        val['buyQty'] = parseFloat(val['buyQty']) + 1
         val['menuPrice'] = parseFloat(val.menuPrice) + i
     });
     emitter.on('remove-qty', (val) => {   // *Listen* for event
@@ -405,6 +426,7 @@ onMounted(() => {
     //     selecteditems.value.push(val)
     //     console.log(filteredArray);
     // });
+    window.scrollTo(0,0);
 })
 function OpenMenu() {
     const que = query(fireRef(db, 'MenuCategory'));
@@ -413,11 +435,62 @@ function OpenMenu() {
         menuData.value = snapshot.val()
     })
 }
+function Checkout() {
+    itemsArray.value = []
+    for (const a in combo.value) {
+        for (const b in combo.value[a].members) {
+            itemsArray.value.push(combo.value[a].members[b])
+        }
+    }
+    for (const a in items.value) {
+        itemsArray.value.push(items.value[a])
+    }
 
+    var output =  itemsArray.value.reduce(function (accumulator, cur) {
+        var name = cur.menuName, found = accumulator.find(function (elem) {
+            return elem.menuName == name
+        });
+        if (found) found.buyQty += cur.buyQty;
+        else accumulator.push(cur);
+        return accumulator;
+    }, []);
+
+    itemsArray.value = output
+
+    internalInstance.appContext.config.globalProperties.gVar.orders['combosub'] = combosub.value
+    internalInstance.appContext.config.globalProperties.gVar.orders['permenusub'] = permenusub.value
+    internalInstance.appContext.config.globalProperties.gVar.orders['total'] = computedtotal.value
+    internalInstance.appContext.config.globalProperties.gVar.orders['disctotal'] = disc.value
+    internalInstance.appContext.config.globalProperties.gVar.orders['items'] = itemsArray.value
+    // console.log(obj)
+}
 
 
 </script>
 <style lang="scss" scoped>
+// Modern floating menu button style
+.floating-menu-btn {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff1744 60%, #ff5252 100%);
+  color: #fff !important;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.22), 0 1.5px 6px rgba(255,23,68,0.18);
+  transition: box-shadow 0.2s, background 0.2s;
+  border: none;
+  outline: none;
+  z-index: 1001;
+}
+.floating-menu-btn:hover, .floating-menu-btn:focus {
+  box-shadow: 0 12px 32px rgba(0,0,0,0.32), 0 2px 8px rgba(255,23,68,0.22);
+  background: linear-gradient(135deg, #d50000 60%, #ff5252 100%);
+}
+.floating-menu-btn .v-icon {
+  font-size: 2rem;
+}
 table,
 tr,
 td,
@@ -442,5 +515,38 @@ h3 {
     position: absolute !important;
     left: 1px;
     top: 0px;
+}
+
+.floating-cart {
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+  min-width: 320px;
+  max-width: 90vw;
+  overflow: hidden;
+}
+.floating-cart .v-card-title {
+  background: #15141B;
+  color: #fff;
+}
+.floating-cart .v-btn {
+  color: #fff;
+}
+.floating-cart .v-divider {
+  background: #333;
+}
+.floating-cart .text-warning {
+  color: #FFC107 !important;
+}
+.floating-cart .font-weight-bold {
+  font-family: 'Montserrat', sans-serif !important;
+}
+.floating-cart .text-caption {
+  font-size: 0.85rem;
+}
+.floating-cart .v-btn {
+  font-weight: bold;
+}
+.floating-cart.expanded {
+  min-height: 200px;
 }
 </style>

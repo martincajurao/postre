@@ -27,5 +27,6 @@ app.config.globalProperties.gVar = {
     items:{},
     selectedItems:[],
     combo:{},
+    orders:{},
 }
 app.mount('#app')

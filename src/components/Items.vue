@@ -31,7 +31,7 @@
                         <v-btn v-if="data.buyQty > 1" @click="removeQty(data);  " size="small" class="text-caption" density="compact" icon="mdi-minus"></v-btn>
                         <v-btn v-else @click="removeQty(data)" disabled size="small" class="text-caption" density="compact" icon="mdi-minus"></v-btn>
                         <input disabled class="text-center text-body-1 " :value="data.buyQty" style="width: 20px;" />
-                        <v-btn @click="addQty(data)" size="small" density="compact" icon="mdi-plus"></v-btn>
+                        <v-btn @click="emitter.emit('add-qty', data);" size="small" density="compact" icon="mdi-plus"></v-btn>
                     </div>
                 </div>
             </div>
@@ -75,9 +75,7 @@ onMounted(() => {
 function RemoveItem(val){
     emitter.emit('remove-item', val);
 }
-function addQty(val){
-    emitter.emit('add-qty', val);
-}
+
 function removeQty(val){
     emitter.emit('remove-qty', val);
 }

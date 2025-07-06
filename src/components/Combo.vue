@@ -10,11 +10,23 @@
                 <v-progress-linear :active="isActive" color="deep-purple" height="4" indeterminate></v-progress-linear>
               </template>
 
-              <v-img  cover height="250" src="https://firebasestorage.googleapis.com/v0/b/postres-c30e4.appspot.com/o/img%2FIMG_20220731_133032.jpg?alt=media&token=5487cfb0-8282-45a1-89fc-5e1ef95d8f28">
-             <div class="d-flex justify-end align-end h-100">
-              <h4 class="text-h5 font-weight-bold bg-red-accent-4 px-4 py-2">{{item.name}}</h4>
-             </div>
-              </v-img>
+              <div style="position:relative;">
+                <v-img  cover :src="item.img" >
+                  <div class="d-flex justify-end align-end h-100">
+                    <h4 class="text-h5 font-weight-bold bg-red-accent-4 px-4 py-2">{{item.name}}</h4>
+                  </div>
+                </v-img>
+                <v-btn
+                  icon
+                  class="download-btn"
+                  size="small"
+                  style="position: absolute; top: 8px; right: 8px; background: transparent; color: #fff; box-shadow: none; z-index: 2; border: none;"
+                  @click="downloadImage(item.img, item.name)"
+                  aria-label="Download image"
+                >
+                  <v-icon color="#fff">mdi-download</v-icon>
+                </v-btn>
+              </div>
               <v-card-item>
                 <h3 >{{ item.desc }}</h3>
                 <v-chip class="mt-1" size="small" color="green-accent-4">Save &#8369;{{Number(item.disc).toLocaleString()}}
@@ -40,7 +52,7 @@
               <v-divider class="mx-4 mb-1"></v-divider>
               <v-card-actions class="px-4 pb-4 pt-3">
                 <v-btn  prepend-icon="mdi-cart" class=" px-3"  color="#DF2C00" variant="flat" @click="AddCombo(item)">
-                  Reserve
+                  order
                 </v-btn>
                 <v-spacer></v-spacer>
                 <h3 class="text-h4"> &#8369;{{Number(item.price).toLocaleString()}}</h3>
@@ -52,16 +64,47 @@
       </v-container>
 </template>
 <script setup>
+// Download image utility
+function downloadImage(url, name) {
+  fetch(url, { mode: 'cors' })
+    .then(response => response.blob())
+    .then(blob => {
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = name ? `${name}.jpg` : 'image.jpg';
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => {
+        URL.revokeObjectURL(link.href);
+        document.body.removeChild(link);
+      }, 100);
+    })
+    .catch(() => {
+      // fallback: open in new tab if download fails
+      window.open(url, '_blank');
+    });
+}
 import { ref, getCurrentInstance, onMounted, inject } from 'vue'
-
+import { db, storage } from '@/firebase'
+import { ref as refS, getDownloadURL } from "firebase/storage";
 const emitter = inject('emitter');
 const internalInstance = getCurrentInstance()
+const img = ref(null);
 const props = defineProps({
     data: {
         type: Object,
         default: {}
     }
 })
+onMounted(async () => {
+
+const imagesRef = refS(storage, 'img/IMG_20220420_133639.jpg');
+getDownloadURL(imagesRef)
+    .then((url) => {
+        img.value = url
+    })
+
+});
 
 function AddCombo(val) {
     // const x = internalInstance.appContext.config.globalProperties.gVar.combo[val.name] = val
@@ -77,5 +120,22 @@ function AddCombo(val) {
       top: .6rem;
       left: 2px;
       z-index: 2 !important;
+    }
+    .download-btn {
+      border-radius: 50% !important;
+      min-width: 32px !important;
+      min-height: 32px !important;
+      width: 32px !important;
+      height: 32px !important;
+      background: transparent !important;
+      color: #fff !important;
+      border: none !important;
+      box-shadow: none !important;
+      transition: background 0.2s, color 0.2s;
+      z-index: 2;
+    }
+    .download-btn:hover {
+      background: transparent !important;
+      color: #fff !important;
     }
 </style>
