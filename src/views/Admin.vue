@@ -108,13 +108,13 @@
                                     </v-btn>
                                 </v-card-actions>
                             </v-card>
-                        </v-col>
-                    </v-row>
-                </v-container>
-
-            </v-main>
-        </template>
+                </v-col>
+            </v-row>
+        </v-container>
+    </v-main>
+    </template>
     </v-app>
+
     <v-dialog v-model="dialog" :scrim="false" persistent width="auto">
         <v-card color="grey-accent-4">
             <v-card-text>
@@ -125,7 +125,6 @@
     </v-dialog>
 
     <v-dialog v-model="comboDialog" fullscreen :scrim="false" transition="dialog-bottom-transition">
-
         <v-card>
             <v-toolbar dark color="success">
                 <v-btn icon dark @click="comboDialog = false">
@@ -133,9 +132,7 @@
                 </v-btn>
                 <v-toolbar-title>Create combo package</v-toolbar-title>
                 <v-spacer></v-spacer>
-
             </v-toolbar>
-
             <v-divider></v-divider>
             <v-row class="pa-4 ">
                 <v-col cols="6" class="h-50">
@@ -146,47 +143,87 @@
                         <div class="d-flex flex-wrap justify-space-between ma-2">
                             <v-divider class="mb-2"></v-divider>
                             <div class="w-50">{{ item.menuName }}</div>
-                            <v-btn @click="Addtocombo(item)" density="comfortable" color="green" prepend-icon="mdi-plus"
-                                size="small">Add</v-btn>
+                            <v-btn @click="Addtocombo(item)" density="comfortable" color="green" prepend-icon="mdi-plus" size="small">Add</v-btn>
                         </div>
                     </div>
                 </v-col>
                 <v-col cols="6">
                     <v-select
-                      v-model="combo.branches"
-                      :items="branches"
-                      label="Branches"
-                      multiple
-                      dense
-                      outlined
-                      class="mb-2"
+                        v-model="combo.branches"
+                        :items="branches"
+                        label="Branches"
+                        multiple
+                        dense
+                        outlined
+                        class="mb-2"
                     ></v-select>
-                    <v-text-field v-model="combo.name" class="mr-" label="Name" density="compact"
-                        variant="outlined"></v-text-field>
-                    <v-text-field v-model="combo.desc" class="mr-" label="Description" density="compact"
-                        variant="outlined"></v-text-field>
-                    <v-text-field v-model="combo.disc" class="mr-" label="Discount" density="compact"
-                        variant="outlined"></v-text-field>
-                    <v-text-field v-model="combo.price" class="mr-" label="Price" density="compact"
-                        variant="outlined"></v-text-field>
+                    <!-- Combo Image Uploader with Cropper -->
+                    <v-file-input
+                        v-model="comboImageFile"
+                        accept="image/*"
+                        label="Combo Image"
+                        prepend-icon="mdi-camera"
+                        @change="onComboImageSelected"
+                        show-size
+                        density="comfortable"
+                        class="mb-2"
+                    ></v-file-input>
+                    <div v-if="comboImageUrl" class="mb-2">
+                        <v-card class="pa-2" style="background: #222; max-width: 500px; margin: auto;">
+                            <VueCropper
+                                ref="comboCropper"
+                                :src="comboImageUrl"
+                                :aspect-ratio="1584/1152"
+                                :auto-crop="true"
+                                :view-mode="1"
+                                :min-container-width="400"
+                                :min-container-height="300"
+                                :auto-crop-area="1"
+                                :background="true"
+                                :guides="true"
+                                :zoomable="true"
+                                :scalable="true"
+                                :rotatable="true"
+                                :movable="true"
+                                :crop-box-movable="true"
+                                :crop-box-resizable="true"
+                                style="width: 100%; max-width: 480px; height: 350px; border: 2px solid #888; background: #222;"
+                            />
+                            <div class="d-flex align-center mt-2 justify-center">
+                                <v-btn color="primary" class="mr-2" @click="cropComboImage">Crop & Use</v-btn>
+                                <v-btn color="grey" variant="outlined" @click="resetComboCropper">Reset</v-btn>
+                                <v-btn color="red" variant="outlined" class="ml-2" @click="removeComboImage">Remove</v-btn>
+                            </div>
+                            <div class="text-caption mt-1 text-white">Drag, zoom, or rotate to adjust. Crop area is fixed to 1584x1152. The preview below updates live as you crop.</div>
+                            <!-- Live preview only if cropper is ready and image is loaded -->
+                            <div v-if="comboCropper && comboCropper.ready && comboImageUrl" class="mt-2 text-center">
+                                <img :src="comboImageUrl" style="max-width: 100%; border: 1px solid #444; background: #111;" alt="Live Preview" />
+                                <div class="text-caption text-grey">Live preview</div>
+                            </div>
+                        </v-card>
+                    </div>
+                    <v-img v-if="combo.img" :src="combo.img" max-width="350" class="mb-2" />
+                    <v-text-field v-model="combo.name" class="mr-" label="Name" density="compact" variant="outlined"></v-text-field>
+                    <v-text-field v-model="combo.desc" class="mr-" label="Description" density="compact" variant="outlined"></v-text-field>
+                    <v-text-field v-model="combo.disc" class="mr-" label="Discount" density="compact" variant="outlined"></v-text-field>
+                    <v-text-field v-model="combo.price" class="mr-" label="Price" density="compact" variant="outlined"></v-text-field>
                     <h3>Includes:</h3>
                     <div v-for="item in combo.members">
                         {{ item.menuName }}
                     </div>
-                    <v-btn @click="Savecombo()" :loading="loader" class="mt-5" prepend-icon="mdi-upload"
-                        color="blue">Save</v-btn>
+                    <v-btn @click="Savecombo()" :loading="loader" class="mt-5" prepend-icon="mdi-upload" color="blue">Save</v-btn>
                 </v-col>
             </v-row>
         </v-card>
     </v-dialog>
+
     <v-dialog v-model="showPasswordPrompt" persistent width="auto">
         <v-card>
             <v-card-title>
                 <span class="headline">Admin Access</span>
             </v-card-title>
             <v-card-text>
-                <v-text-field v-model="password" label="Password" type="password"
-                    @keyup.enter="checkPassword"></v-text-field>
+                <v-text-field v-model="password" label="Password" type="password" @keyup.enter="checkPassword"></v-text-field>
             </v-card-text>
             <v-card-actions>
                 <v-spacer></v-spacer>
@@ -201,7 +238,64 @@ import { ref, computed, onMounted } from 'vue'
 import { ref as fireRef, getDatabase, get, set, query, orderByChild, update } from "firebase/database";
 import { ref as strRef, getDownloadURL, uploadBytes } from "firebase/storage";
 import { db, storage } from '@/firebase'
-import { uuidv4 } from '@firebase/util';
+import { v4 as uuidv4 } from 'uuid';
+import VueCropper from 'vue-cropperjs';
+import 'cropperjs/dist/cropper.min.css';
+
+// --- Combo Image Cropper State ---
+const comboImageFile = ref(null);
+const comboImageUrl = ref(null);
+const comboCropper = ref(null);
+
+function onComboImageSelected(e) {
+  let file = null;
+  // v-file-input with v-model gives file directly, event gives e.target.files
+  if (e && e.target && e.target.files) {
+    file = e.target.files[0];
+  } else if (e instanceof File) {
+    file = e;
+  } else if (Array.isArray(e)) {
+    file = e[0];
+  } else if (e) {
+    file = e;
+  }
+  if (file) {
+    comboImageFile.value = file;
+    comboImageUrl.value = URL.createObjectURL(file);
+    // Reset cropper state if needed
+    if (comboCropper.value && comboCropper.value.replace) {
+      comboCropper.value.replace(comboImageUrl.value);
+    }
+  }
+}
+
+function cropComboImage() {
+  if (!comboCropper.value) return;
+  const canvas = comboCropper.value.getCroppedCanvas({ width: 1584, height: 1152 });
+  if (!canvas) return;
+  canvas.toBlob(blob => {
+    if (blob) {
+      comboImageFile.value = new File([blob], comboImageFile.value?.name || 'combo.jpg', { type: blob.type });
+      combo.img = URL.createObjectURL(comboImageFile.value);
+    }
+  }, 'image/jpeg');
+}
+
+function resetComboCropper() {
+  if (comboCropper.value && comboCropper.value.reset) {
+    comboCropper.value.reset();
+  }
+  comboImageFile.value = null;
+  comboImageUrl.value = null;
+  combo.img = '';
+}
+
+function removeComboImage() {
+  comboImageFile.value = null;
+  comboImageUrl.value = null;
+  if (comboCropper.value && comboCropper.value.replace) comboCropper.value.replace('');
+  combo.img = '';
+}
 
 // Auth
 const isAuthenticated = ref(false);
@@ -256,7 +350,7 @@ const combo = ref({
     img: '',
     price: 0,
     members: {},
-    branches: ['naga']
+    branches: []
 })
 // Category filter for combo dialog
 const comboSelectedCategory = ref('');
@@ -394,13 +488,39 @@ function Addtocombo(val) {
   combo.value.members[val.menuCode] = val;
 }
 
-function Savecombo() {
+function sanitizeKey(str) {
+  return str.replace(/[.#$\[\]]/g, '_');
+}
+
+async function Savecombo() {
+  console.log("Savecombo called with combo:", combo.value);
   loader.value = true;
-  set(fireRef(db, 'Combo/' + combo.value.name), combo.value).then(() => {
+  if (!combo.value.name) {
+    console.error("Combo name is required to save.");
+    alert("Please enter a name for the combo.");
+    loader.value = false;
+    return;
+  }
+  try {
+    if (comboImageFile.value) {
+      const storageRef = strRef(storage, 'img/combo_' + Date.now() + '_' + comboImageFile.value.name);
+      await uploadBytes(storageRef, comboImageFile.value);
+      combo.img = await getDownloadURL(storageRef);
+      console.log("Uploaded combo image URL:", combo.img);
+      combo.value.img = combo.img;
+    }
+    await set(fireRef(db, 'Combo/' + sanitizeKey(combo.value.name)), combo.value);
+    console.log("Combo saved successfully.");
     loader.value = false;
     comboDialog.value = false;
-    combo.value = { name: '', desc: '', disc: 0, img: '', price: 0, members: {}, branches: ['naga'] };
-  })
+    combo.value = { name: '', desc: '', disc: 0, img: '', price: 0, members: {}, branches: [] };
+    comboImageFile.value = null;
+    comboImageUrl.value = null;
+  } catch (error) {
+    console.error("Error saving combo:", error);
+    alert("An error occurred while saving the combo.");
+    loader.value = false;
+  }
 }
 
 function updateMenu() {
@@ -411,19 +531,25 @@ function updateMenu() {
   }
   dialog.value = true;
   // If creating new, generate a new code
-  if (!menu.value.menuCode) {
-    menu.value.menuCode = uuidv4();
-  }
+    if (!menu.value.menuCode) {
+      menu.value.menuCode = uuidv4();
+    }
   const dbInstance = getDatabase();
   // If image is selected, upload it first
   if (image.value) {
     const storageRef = strRef(storage, 'img/' + image.value.name);
     uploadBytes(storageRef, image.value).then((snapshot) => {
-      getDownloadURL(storageRef)
-        .then((imgUrl) => {
-          menu.value.img = imgUrl;
-          saveMenuData(dbInstance);
-        })
+getDownloadURL(storageRef)
+  .then((imgUrl) => {
+    menu.value.img = imgUrl;
+    saveMenuData(dbInstance);
+  })
+  .catch((error) => {
+    console.error("Error getting image URL:", error);
+    // Handle missing image gracefully, e.g., set to placeholder or empty string
+    menu.value.img = '';
+    saveMenuData(dbInstance);
+  })
     });
   } else {
     saveMenuData(dbInstance);

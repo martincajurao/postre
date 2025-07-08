@@ -6,6 +6,10 @@
 
 // Components
 import App from './App.vue'
+import 'cropperjs/dist/cropper.css';
+
+
+
 import mitt from 'mitt'
 // Composables
 import { createApp } from 'vue'

@@ -1,7 +1,7 @@
 <template lang="">
         <v-container>
         <v-row class="d-flex align-center">
-          <v-col cols="12" sm="6" md="4" v-for="item in data" style="position:relative">
+<v-col cols="12" sm="6" md="4" v-for="item in comboList" style="position:relative">
 
             <v-img class="best-seller" src="@/assets/best-seller.png" width="150" cover ></v-img>
 
@@ -11,7 +11,12 @@
               </template>
 
               <div style="position:relative;">
-                <v-img  cover :src="item.img" >
+                <v-img  cover :src="item.img">
+                  <template v-slot:placeholder>
+                    <div class="d-flex align-center justify-center fill-height">
+                      <v-progress-circular color="deep-purple" indeterminate></v-progress-circular>
+                    </div>
+                  </template>
                   <div class="d-flex justify-end align-end h-100">
                     <h4 class="text-h5 font-weight-bold bg-red-accent-4 px-4 py-2">{{item.name}}</h4>
                   </div>
@@ -84,7 +89,7 @@ function downloadImage(url, name) {
       window.open(url, '_blank');
     });
 }
-import { ref, getCurrentInstance, onMounted, inject } from 'vue'
+import { ref, getCurrentInstance, onMounted, inject, computed } from 'vue'
 import { db, storage } from '@/firebase'
 import { ref as refS, getDownloadURL } from "firebase/storage";
 const emitter = inject('emitter');
@@ -93,18 +98,15 @@ const img = ref(null);
 const props = defineProps({
     data: {
         type: Object,
-        default: {}
+        default: () => ({})
     }
 })
-onMounted(async () => {
 
-const imagesRef = refS(storage, 'img/IMG_20220420_133639.jpg');
-getDownloadURL(imagesRef)
-    .then((url) => {
-        img.value = url
-    })
-
+const comboList = computed(() => {
+  if (!props.data) return [];
+  return Array.isArray(props.data) ? props.data : Object.values(props.data);
 });
+
 
 function AddCombo(val) {
     // const x = internalInstance.appContext.config.globalProperties.gVar.combo[val.name] = val

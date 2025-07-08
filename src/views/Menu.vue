@@ -1,7 +1,6 @@
 <template>
     <div class="mainWrap mb-15">
 
-
         <v-card class="mx-auto ">
 
             <v-img src="" class="align-end text-white banner-img pa-5" height="250" cover>
@@ -18,6 +17,16 @@
                     <span class="max-w200">Inspired by recipes and creations of Calbayog Samar.</span>
                 </v-card-subtitle>
             </v-img>
+
+            <v-text-field
+              v-model="searchQuery"
+              label="Search menu"
+              clearable
+              outlined
+              dense
+              class="mx-5 my-4"
+              append-icon="mdi-magnify"
+            ></v-text-field>
         </v-card>
        
         <!-- Pork Dishes -->
@@ -31,43 +40,43 @@
             </v-card-subtitle>
         </div>
 
-        <v-container v-if="!fetching">
-            <v-row justify="center" align="center" class="">
-                <v-col cols="12" sm="6" md="4" v-for="item in data.PO" :key="item.menuCode"
-                    style="position: relative !important;">
-                    <v-img v-if="item.isHot" class="best-seller" src="@/assets/best-seller.png" width="120" cover></v-img>
-                    <v-card class="menu-card  menu-card align-center d-flex flex-row ">
-                        <div style="position:relative;" @click="dialog = true">
-                            <v-img class="align-end text-white " aspect-ratio="1" height="170" width="170" cover
-                                :src="item.img">
-                                <template v-slot:placeholder>
-                                    <div class="d-flex align-center justify-center fill-height">
-                                        <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
-                                    </div>
-                                </template>
-                            </v-img>
-                            <v-btn
-                              icon
-                              class="download-btn"
-                              size="small"
-                              style="position: absolute; top: 8px; right: 8px; background: #fff; color: #ff1744; box-shadow: 0 2px 8px rgba(0,0,0,0.12); z-index: 2;"
-                              @click.stop="downloadImage(item.img, item.menuName)"
-                            >
-                              <v-icon>mdi-download</v-icon>
-                            </v-btn>
-                        </div>
-                        <div class="  align-center pa-4">
-                            <h4 class="">{{ item.menuName }}</h4>
-                            <div class=" text-grey-lighten-1 text-caption">Tasty & Crispy Spare Ribs</div>
-                            <h5 class="my-2">&#8369;{{ Number(item.menuPrice).toLocaleString() }}</h5>
-                            <v-btn @click="AddToCart(item)" class="mt-1 text-subtitle-2" density="comfortable"
-                                prepend-icon="mdi-cart" color="amber" variant="outlined">Add to order</v-btn>
-                        </div>
-                    </v-card>
+<v-container v-if="!fetching">
+    <v-row justify="center" align="center" class="">
+        <v-col cols="12" sm="6" md="4" v-for="(item, key) in filteredData.PO" :key="item.menuCode"
+            style="position: relative !important;">
+            <v-img v-if="item.isHot" class="best-seller" src="@/assets/best-seller.png" width="120" cover></v-img>
+            <v-card class="menu-card  menu-card align-center d-flex flex-row ">
+                <div style="position:relative;" @click="dialog = true">
+                    <v-img class="align-end text-white " aspect-ratio="1" height="170" width="170" cover
+                        :src="item.img">
+                        <template v-slot:placeholder>
+                            <div class="d-flex align-center justify-center fill-height">
+                                <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
+                            </div>
+                        </template>
+                    </v-img>
+                    <v-btn
+                      icon
+                      class="download-btn"
+                      size="small"
+                      style="position: absolute; top: 8px; right: 8px; background: #fff; color: #ff1744; box-shadow: 0 2px 8px rgba(0,0,0,0.12); z-index: 2;"
+                      @click.stop="downloadImage(item.img, item.menuName)"
+                    >
+                      <v-icon>mdi-download</v-icon>
+                    </v-btn>
+                </div>
+                <div class="  align-center pa-4">
+                    <h4 class="">{{ item.menuName }}</h4>
+                    <div class=" text-grey-lighten-1 text-caption">{{ item.menuDesc }}</div>
+                    <h5 class="my-2">&#8369;{{ Number(item.menuPrice).toLocaleString() }}</h5>
+                    <v-btn @click="AddToCart(item)" class="mt-1 text-subtitle-2" density="comfortable"
+                        prepend-icon="mdi-cart" color="amber" variant="outlined">Add to order</v-btn>
+                </div>
+            </v-card>
 
-                </v-col>
-            </v-row>
-        </v-container>
+        </v-col>
+    </v-row>
+</v-container>
         <v-container v-else-if="fetching">
             <v-row>
                 <v-col cols="12" sm="6" md="4" v-for="i in 6">
@@ -89,7 +98,7 @@
         </div>
         <v-container>
             <v-row justify="center" align="center" class="">
-                <v-col cols="12" sm="6" md="4" v-for="item in data.CH" :key="item.menuCode"
+                <v-col cols="12" sm="6" md="4" v-for="(item, key) in data.CH" :key="item.menuCode"
                     style="position: relative !important;">
                     <v-img v-if="item.isHot" class="best-seller" src="@/assets/best-seller.png" width="120" cover></v-img>
                     <v-card class="menu-card  menu-card align-center d-flex flex-row ">
@@ -105,7 +114,7 @@
                         </div>
                         <div class="  align-center pa-4">
                             <h4 class="">{{ item.menuName }}</h4>
-                            <div class=" text-grey-lighten-1 text-caption">Tasty & Crispy Spare Ribs</div>
+                            <div class=" text-grey-lighten-1 text-caption">{{ item.menuDesc }}</div>
                             <h5 class="my-2">Php {{ item.menuPrice }}</h5>
                             <v-btn @click="AddToCart(item)" class="mt-1 text-subtitle-2" density="comfortable"
                                 prepend-icon="mdi-cart" color="amber" variant="outlined">Add to order</v-btn>
@@ -128,7 +137,7 @@
         </div>
         <v-container>
             <v-row justify="center" align="center" class="">
-                <v-col cols="12" sm="6" md="4" v-for="item in data.PA" :key="item.menuCode"
+                <v-col cols="12" sm="6" md="4" v-for="(item, key) in data.PA" :key="item.menuCode"
                     style="position: relative !important;">
                     <v-img v-if="item.isHot" class="best-seller" src="@/assets/best-seller.png" width="120" cover></v-img>
                     <v-card class="menu-card  menu-card align-center d-flex flex-row ">
@@ -144,7 +153,7 @@
                         </div>
                         <div class="  align-center pa-4">
                             <h4 class="">{{ item.menuName }}</h4>
-                            <div class=" text-grey-lighten-1 text-caption">Tasty & Crispy Spare Ribs</div>
+                            <div class=" text-grey-lighten-1 text-caption">{{ item.menuDesc }}</div>
                             <h5 class="my-2">Php {{ item.menuPrice }}</h5>
                             <v-btn @click="AddToCart(item)" class="mt-1 text-subtitle-2" density="comfortable"
                                 prepend-icon="mdi-cart" color="amber" variant="outlined">Add to order</v-btn>
@@ -168,7 +177,7 @@
         </div>
         <v-container>
             <v-row justify="center" align="center" class="">
-                <v-col cols="12" sm="6" md="4" v-for="item in data.VE" :key="item.menuCode"
+                <v-col cols="12" sm="6" md="4" v-for="(item, key) in data.VE" :key="item.menuCode"
                     style="position: relative !important;">
                     <v-img v-if="item.isHot" class="best-seller" src="@/assets/best-seller.png" width="120" cover></v-img>
                     <v-card class="menu-card  menu-card align-center d-flex flex-row ">
@@ -184,7 +193,7 @@
                         </div>
                         <div class="  align-center pa-4">
                             <h4 class="">{{ item.menuName }}</h4>
-                            <div class=" text-grey-lighten-1 text-caption">Tasty & Crispy Spare Ribs</div>
+                            <div class=" text-grey-lighten-1 text-caption">{{ item.menuDesc }}</div>
                             <h5 class="my-2">Php {{ item.menuPrice }}</h5>
                             <v-btn @click="AddToCart(item)" class="mt-1 text-subtitle-2" density="comfortable"
                                 prepend-icon="mdi-cart" color="amber" variant="outlined">Add to order</v-btn>
@@ -207,7 +216,7 @@
         </div>
         <v-container>
             <v-row justify="center" align="center" class="">
-                <v-col cols="12" sm="6" md="4" v-for="item in data.MC" :key="item.menuCode"
+                <v-col cols="12" sm="6" md="4" v-for="(item, key) in data.MC" :key="item.menuCode"
                     style="position: relative !important;">
                     <v-img v-if="item.isHot" class="best-seller" src="@/assets/best-seller.png" width="120" cover></v-img>
                     <v-card class="menu-card  menu-card align-center d-flex flex-row ">
@@ -223,7 +232,7 @@
                         </div>
                         <div class="  align-center pa-4">
                             <h4 class="">{{ item.menuName }}</h4>
-                            <div class=" text-grey-lighten-1 text-caption">Tasty & Crispy Spare Ribs</div>
+                            <div class=" text-grey-lighten-1 text-caption">{{ item.menuDesc }}</div>
                             <h5 class="my-2">Php {{ item.menuPrice }}</h5>
                             <v-btn @click="AddToCart(item)" class="mt-1 text-subtitle-2" density="comfortable"
                                 prepend-icon="mdi-cart" color="amber" variant="outlined">Add to order</v-btn>
@@ -246,7 +255,7 @@
         </div>
         <v-container>
             <v-row justify="center" align="center" class="">
-                <v-col cols="12" sm="6" md="4" v-for="item in data.SF" :key="item.menuCode"
+                <v-col cols="12" sm="6" md="4" v-for="(item, key) in data.SF" :key="item.menuCode"
                     style="position: relative !important;">
                     <v-img v-if="item.isHot" class="best-seller" src="@/assets/best-seller.png" width="120" cover></v-img>
                     <v-card class="menu-card  menu-card align-center d-flex flex-row ">
@@ -328,6 +337,40 @@
 </template>
 
 <script setup>
+import { update, ref as fireRefUpdate } from "firebase/database";
+
+function generateUniqueDesc(name) {
+  // Generate a unique 3-word value based on the menuName
+  // For simplicity, split the name into words and take first 3 words or pad with 'X'
+  const words = name.split(/\s+/).slice(0, 3);
+  while (words.length < 3) {
+    words.push('X');
+  }
+  return words.join('-').toLowerCase();
+}
+
+async function updateMenuDesc(category, key, menuName) {
+  console.log(`updateMenuDesc called with category=${category}, key=${key}, menuName=${menuName}`);
+  const newDesc = generateUniqueDesc(menuName);
+  console.log(`Generated newDesc: ${newDesc}`);
+  const path = `MenuCategory/${category}/${key}`;
+  const dbRef = fireRefUpdate(db, path);
+  try {
+    // Disable button or show loading state could be added here
+    await update(dbRef, { menuDesc: newDesc });
+    console.log(`Firebase update successful for path: ${path}`);
+    // Update local data to reflect change
+    if (data.value[category] && data.value[category][key]) {
+      data.value[category][key].menuDesc = newDesc;
+    }
+    alert(`Updated menuDesc to "${newDesc}" for ${menuName}`);
+  } catch (error) {
+    console.error("Failed to update menuDesc:", error);
+    alert("Failed to update menuDesc. See console for details.");
+  } finally {
+    // Re-enable button or hide loading state here if implemented
+  }
+}
 // Download image utility
 function downloadImage(url, name) {
   fetch(url)
@@ -360,6 +403,7 @@ const fetching = ref(true);
 const timeout = ref(10000);
 const data = ref({});
 const items = ref({})
+const searchQuery = ref('');
 const emitter = inject('emitter');
 const smoothScroll = inject('smoothScroll');
 
@@ -379,6 +423,28 @@ function navigateTo(val) {
         // offset: -50,
     })
 }
+
+const filteredData = computed(() => {
+  if (!searchQuery.value) {
+    return data.value;
+  }
+  const lowerQuery = searchQuery.value.toLowerCase();
+  const result = {};
+  for (const category in data.value) {
+    const filteredItems = {};
+    for (const key in data.value[category]) {
+      const item = data.value[category][key];
+      if (item.menuName.toLowerCase().includes(lowerQuery)) {
+        filteredItems[key] = item;
+      }
+    }
+    if (Object.keys(filteredItems).length > 0) {
+      result[category] = filteredItems;
+    }
+  }
+  return result;
+});
+
 onMounted(async () => {
 
     const selectedBranch = localStorage.getItem('selectedBranch') || 'naga';
@@ -522,88 +588,5 @@ onMounted(async () => {
   top: 4px;
   left: 4px;
   z-index: 1 !important;
-}
-</style>
-}
-
-/* --- CSS Styles for Menu.vue --- */
-<style scoped>
-.download-btn {
-  border-radius: 50% !important;
-  min-width: 32px !important;
-  min-height: 32px !important;
-  width: 32px !important;
-  height: 32px !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-  transition: background 0.2s, color 0.2s;
-  z-index: 2;
-}
-.download-btn:hover {
-  background: #ff1744 !important;
-  color: #fff !important;
-}
-.banner-img {
-  background-size: cover;
-  background-image: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url(https://firebasestorage.googleapis.com/v0/b/postres-c30e4.appspot.com/o/img%2FIMG_20220420_133639.jpg?alt=media&token=bc565fbc-7776-4c8d-90c4-604d758e767a);
-}
-.div2nd {
-  padding-bottom: 0;
-  margin-top: 2rem;
-  margin-bottom: 2rem;
-}
-.div2nd h3 {
-  display: inline;
-  background-color: #ED0000;
-}
-.div2nd h1 {
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-}
-.text-h2 {
-  font-family: 'Satisfy', helvetica !important;
-}
-.header-red {
-  font-family: 'Montserrat' !important;
-  font-weight: 600;
-}
-.btm-fix {
-  position: fixed;
-  width: 100%;
-  bottom: 0;
-}
-.fixed-icons {
-  color: #AAAAAA;
-  transition: ease all .5s;
-  cursor: pointer;
-  max-width: 100px !important;
-}
-.fixed-icons:hover {
-  animation: shake 0.5s;
-  color: white;
-}
-.menu-card {
-  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-  cursor: pointer;
-  transition: all ease 0.3s;
-}
-.menu-card:hover {
-  box-shadow: rgba(121, 188, 243, 0.35) 0px 5px 15px;
-}
-@keyframes shake {
-  0% { transform: translate(1px, 1px) rotate(0deg); }
-  20% { transform: translate(-3px, 0px) rotate(1deg); }
-  40% { transform: translate(1px, -1px) rotate(1deg); }
-  60% { transform: translate(-3px, 1px) rotate(0deg); }
-  80% { transform: translate(-1px, -1px) rotate(1deg); }
-  100% { transform: translate(1px, -2px) rotate(-1deg); }
-}
-.best-seller {
-  position: absolute !important;
-  top: 4px;
-  left: 4px;
-  z-index: 1 !important;
-}
-.active {
-  color: rgb(250, 185, 8) !important;
 }
 </style>
