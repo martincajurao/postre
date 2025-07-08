@@ -4,31 +4,84 @@
         <v-card class="mx-auto ">
 
             <v-img src="" class="align-end text-white banner-img pa-5" height="250" cover>
-                <v-card-title class="text-body-1">
-                    <span>Home</span>
-                    <v-icon icon="mdi-chevron-right"></v-icon>
-                    <span>Menu</span>
-                    <h1 class="text-h3"
-                        style="font-family: Montserrat !important; font-weight: 800; text-transform: uppercase !important;">
-                        Our Menu
-                    </h1>
-                </v-card-title>
-                <v-card-subtitle class="">
-                    <span class="max-w200">Inspired by recipes and creations of Calbayog Samar.</span>
-                </v-card-subtitle>
+                <v-row align="end" class="fill-height">
+                    <v-col cols="12" md="6">
+                        <v-card-title class="text-body-1">
+                            <span>Home</span>
+                            <v-icon icon="mdi-chevron-right"></v-icon>
+                            <span>Menu</span>
+                            <h1 class="text-h3"
+                                style="font-family: Montserrat !important; font-weight: 800; text-transform: uppercase !important;">
+                                Our Menu
+                            </h1>
+                        </v-card-title>
+                        <v-card-subtitle class="">
+                            <span class="max-w200">Inspired by recipes and creations of Calbayog Samar.</span>
+                        </v-card-subtitle>
+                    </v-col>
+                    <v-col cols="12" md="6">
+                        <v-text-field
+                          v-model="searchQuery"
+                          label="Search menu"
+                          clearable
+                          variant="solo-inverted"
+                          class="mx-5 my-4"
+                          prepend-inner-icon="mdi-magnify"
+                        ></v-text-field>
+                    </v-col>
+                </v-row>
             </v-img>
 
-            <v-text-field
-              v-model="searchQuery"
-              label="Search menu"
-              clearable
-              outlined
-              dense
-              class="mx-5 my-4"
-              append-icon="mdi-magnify"
-            ></v-text-field>
+            
         </v-card>
-       
+
+        <!-- Search Results Display -->
+        <v-container v-if="searchQuery && filteredData.length > 0">
+            <v-row justify="center" align="center" class="">
+                <v-col cols="12" sm="6" md="4" v-for="(item, index) in filteredData" :key="item.menuCode || index"
+                    style="position: relative !important;">
+                    <v-img v-if="item.isHot" class="best-seller" src="@/assets/best-seller.png" width="120" cover></v-img>
+                    <v-card class="menu-card  menu-card align-center d-flex flex-row ">
+                        <div style="position:relative; display: inline-block;" @click="dialog = true">
+                            <v-img class="align-end text-white " aspect-ratio="1" height="170" width="170" cover
+                                :src="item.img">
+                                <template v-slot:placeholder>
+                                    <div class="d-flex align-center justify-center fill-height">
+                                        <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
+                                    </div>
+                                </template>
+                            </v-img>
+                            <v-btn
+                              icon
+                              class="download-btn"
+                              size="small"
+                              style="position: absolute; top: 8px; right: 8px; background: #fff; color: #ff1744; box-shadow: 0 2px 8px rgba(0,0,0,0.12); z-index: 2;"
+                              @click.stop="downloadImage(item.img, item.menuName)"
+                            >
+                              <v-icon>mdi-download</v-icon>
+                            </v-btn>
+                        </div>
+                        <div class="  align-center pa-4">
+                            <h4 class="">{{ item.menuName }}</h4>
+                            <div class=" text-grey-lighten-1 text-caption">{{ item.menuDesc }}</div>
+                            <h5 class="my-2">&#8369;{{ Number(item.menuPrice).toLocaleString() }}</h5>
+                            <v-btn @click="AddToCart(item)" class="mt-1 text-subtitle-2" density="comfortable"
+                                prepend-icon="mdi-cart" color="amber" variant="outlined">Add to order</v-btn>
+                        </div>
+                    </v-card>
+                </v-col>
+            </v-row>
+        </v-container>
+
+        <!-- No Search Results Message -->
+        <v-container v-if="searchQuery && filteredData.length === 0">
+            <v-row justify="center">
+                <v-col cols="12" class="text-center">
+                    <p class="text-h6 text-grey">No menu items found matching "{{ searchQuery }}".</p>
+                </v-col>
+            </v-row>
+        </v-container>
+
         <!-- Pork Dishes -->
         <div v-if="!searchQuery" id="pork" class=" div2nd my-5 px-5 mt-12" style=" text-align: center;">
             <div class="text-body-1 font-weight-bold d-inline bg-red-accent-4 py-1 px-3 header-red ">
@@ -87,7 +140,7 @@
         <!-- end -->
 
         <!-- Beef Dishes -->
-        <div v-if="!searchQuery" id="beef" class=" div2nd my-5 px-5 mt-12" style=" text-align: center;">
+        <div id="beef" class=" div2nd my-5 px-5 mt-12" style=" text-align: center;">
             <div class="text-body-1 font-weight-bold d-inline bg-red-accent-4 py-1 px-3 header-red ">
                 TASTY & AFFORDABLE
             </div>
@@ -96,7 +149,7 @@
                 <span class="">Rich, tender, and flavorful</span>
             </v-card-subtitle>
         </div>
-        <v-container v-if="!fetching">
+        <v-container v-if="!fetching && !searchQuery">
             <v-row justify="center" align="center" class="">
                 <v-col cols="12" sm="6" md="4" v-for="(item, key) in filteredData.BF" :key="item.menuCode"
                     style="position: relative !important;">
@@ -328,7 +381,7 @@
         <!-- end -->
 
         <!-- Seafood Dishes -->
-        <div v-if="!searchQuery" id="seafood" class=" div2nd my-5 px-5 mt-12" style=" text-align: center;">
+        <div id="seafood" class=" div2nd my-5 px-5 mt-12" style=" text-align: center;">
             <div class="text-body-1 font-weight-bold d-inline bg-red-accent-4 py-1 px-3 header-red ">
                 TASTY & AFFORDABLE
             </div>
@@ -337,7 +390,7 @@
                 <span class="">Tasty, fresh, well-seasoned</span>
             </v-card-subtitle>
         </div>
-        <v-container>
+        <v-container v-if="!searchQuery">
             <v-row justify="center" align="center" class="">
                 <v-col cols="12" sm="6" md="4" v-for="(item, key) in filteredData.SF" :key="item.menuCode"
                     style="position: relative !important;">
@@ -557,20 +610,17 @@ const filteredData = computed(() => {
     return data.value;
   }
   const lowerQuery = searchQuery.value.toLowerCase();
-  const result = {};
+  const searchResults = [];
+
   for (const category in data.value) {
-    const filteredItems = {};
     for (const key in data.value[category]) {
       const item = data.value[category][key];
       if (item.menuName.toLowerCase().includes(lowerQuery)) {
-        filteredItems[key] = item;
+        searchResults.push(item);
       }
     }
-    if (Object.keys(filteredItems).length > 0) {
-      result[category] = filteredItems;
-    }
   }
-  return result;
+  return searchResults;
 });
 
 onMounted(async () => {
