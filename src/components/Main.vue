@@ -29,7 +29,6 @@
       </div>
 
       <Combo :data="data" />
-      <Location ref="locationRef" />
       <Cropper />
       <div ref="about" class="div2nd px-5 py-3 w-75 mx-auto" style="text-align: center;">
         <div class="text-body-1 d-inline bg-red-accent-4 py-1 px-3 header-red">

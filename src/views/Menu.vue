@@ -30,7 +30,7 @@
         </v-card>
        
         <!-- Pork Dishes -->
-        <div id="pork" class=" div2nd my-5 px-5 mt-12" style=" text-align: center;">
+        <div v-if="!searchQuery" id="pork" class=" div2nd my-5 px-5 mt-12" style=" text-align: center;">
             <div class="text-body-1 font-weight-bold d-inline bg-red-accent-4 py-1 px-3 header-red ">
                 TASTY & AFFORDABLE
             </div>
@@ -46,7 +46,7 @@
             style="position: relative !important;">
             <v-img v-if="item.isHot" class="best-seller" src="@/assets/best-seller.png" width="120" cover></v-img>
             <v-card class="menu-card  menu-card align-center d-flex flex-row ">
-                <div style="position:relative;" @click="dialog = true">
+                <div style="position:relative; display: inline-block;" @click="dialog = true">
                     <v-img class="align-end text-white " aspect-ratio="1" height="170" width="170" cover
                         :src="item.img">
                         <template v-slot:placeholder>
@@ -86,8 +86,56 @@
         </v-container>
         <!-- end -->
 
+        <!-- Beef Dishes -->
+        <div v-if="!searchQuery" id="beef" class=" div2nd my-5 px-5 mt-12" style=" text-align: center;">
+            <div class="text-body-1 font-weight-bold d-inline bg-red-accent-4 py-1 px-3 header-red ">
+                TASTY & AFFORDABLE
+            </div>
+            <h1 class="text-h2">Beef Dishes</h1>
+            <v-card-subtitle class="">
+                <span class="">Rich, tender, and flavorful</span>
+            </v-card-subtitle>
+        </div>
+        <v-container v-if="!fetching">
+            <v-row justify="center" align="center" class="">
+                <v-col cols="12" sm="6" md="4" v-for="(item, key) in filteredData.BF" :key="item.menuCode"
+                    style="position: relative !important;">
+                    <v-img v-if="item.isHot" class="best-seller" src="@/assets/best-seller.png" width="120" cover></v-img>
+                    <v-card class="menu-card  menu-card align-center d-flex flex-row ">
+                        <div style="position:relative; display: inline-block;" @click="dialog = true">
+                            <v-img class="align-end text-white " aspect-ratio="1" height="170" width="170" cover
+                                :src="item.img">
+                                <template v-slot:placeholder>
+                                    <div class="d-flex align-center justify-center fill-height">
+                                        <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
+                                    </div>
+                                </template>
+                            </v-img>
+                            <v-btn
+                              icon
+                              class="download-btn"
+                              size="small"
+                              style="position: absolute; top: 8px; right: 8px; background: #fff; color: #ff1744; box-shadow: 0 2px 8px rgba(0,0,0,0.12); z-index: 2;"
+                              @click.stop="downloadImage(item.img, item.menuName)"
+                            >
+                              <v-icon>mdi-download</v-icon>
+                            </v-btn>
+                        </div>
+                        <div class="  align-center pa-4">
+                            <h4 class="">{{ item.menuName }}</h4>
+                            <div class=" text-grey-lighten-1 text-caption">{{ item.menuDesc }}</div>
+                            <h5 class="my-2">Php {{ item.menuPrice }}</h5>
+                            <v-btn @click="AddToCart(item)" class="mt-1 text-subtitle-2" density="comfortable"
+                                prepend-icon="mdi-cart" color="amber" variant="outlined">Add to order</v-btn>
+                        </div>
+                    </v-card>
+                </v-col>
+            </v-row>
+        </v-container>
+        <!-- end -->
+
         <!-- Chicken Dishes -->
-        <div id="chicken" class=" div2nd my-5 px-5 mt-12" style=" text-align: center;">
+        <div v-if="!searchQuery" id="chicken" class=" div2nd my-5 px-5 mt-12" style=" text-align: center;">
             <div class="text-body-1 font-weight-bold d-inline bg-red-accent-4 py-1 px-3 header-red ">
                 TASTY & AFFORDABLE
             </div>
@@ -98,20 +146,29 @@
         </div>
         <v-container>
             <v-row justify="center" align="center" class="">
-                <v-col cols="12" sm="6" md="4" v-for="(item, key) in data.CH" :key="item.menuCode"
+                <v-col cols="12" sm="6" md="4" v-for="(item, key) in filteredData.CH" :key="item.menuCode"
                     style="position: relative !important;">
                     <v-img v-if="item.isHot" class="best-seller" src="@/assets/best-seller.png" width="120" cover></v-img>
                     <v-card class="menu-card  menu-card align-center d-flex flex-row ">
-                        <div @click="dialog = true">
-                            <v-img class="align-end text-white " aspect-ratio="1" height="170" width="170" cover
-                                :src="item.img">
-                                <template v-slot:placeholder>
-                                    <div class="d-flex align-center justify-center fill-height">
-                                        <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
-                                    </div>
-                                </template>
-                            </v-img>
-                        </div>
+                <div style="position:relative; display: inline-block;" @click="dialog = true">
+                    <v-img class="align-end text-white " aspect-ratio="1" height="170" width="170" cover
+                        :src="item.img">
+                        <template v-slot:placeholder>
+                            <div class="d-flex align-center justify-center fill-height">
+                                <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
+                            </div>
+                        </template>
+                    </v-img>
+                    <v-btn
+                      icon
+                      class="download-btn"
+                      size="small"
+                      style="position: absolute; top: 8px; right: 8px; background: #fff; color: #ff1744; box-shadow: 0 2px 8px rgba(0,0,0,0.12); z-index: 2;"
+                      @click.stop="downloadImage(item.img, item.menuName)"
+                    >
+                      <v-icon>mdi-download</v-icon>
+                    </v-btn>
+                </div>
                         <div class="  align-center pa-4">
                             <h4 class="">{{ item.menuName }}</h4>
                             <div class=" text-grey-lighten-1 text-caption">{{ item.menuDesc }}</div>
@@ -126,7 +183,7 @@
         </v-container>
         <!-- end -->
         <!-- Pasta Dishes -->
-        <div id="pasta" class=" div2nd my-5 px-5 mt-12" style=" text-align: center;">
+        <div v-if="!searchQuery" id="pasta" class=" div2nd my-5 px-5 mt-12" style=" text-align: center;">
             <div class="text-body-1 font-weight-bold d-inline bg-red-accent-4 py-1 px-3 header-red ">
                 TASTY & AFFORDABLE
             </div>
@@ -137,11 +194,11 @@
         </div>
         <v-container>
             <v-row justify="center" align="center" class="">
-                <v-col cols="12" sm="6" md="4" v-for="(item, key) in data.PA" :key="item.menuCode"
+                <v-col cols="12" sm="6" md="4" v-for="(item, key) in filteredData.PA" :key="item.menuCode"
                     style="position: relative !important;">
                     <v-img v-if="item.isHot" class="best-seller" src="@/assets/best-seller.png" width="120" cover></v-img>
                     <v-card class="menu-card  menu-card align-center d-flex flex-row ">
-                        <div @click="dialog = true">
+                        <div style="position:relative; display: inline-block;" @click="dialog = true">
                             <v-img class="align-end text-white " aspect-ratio="1" height="170" width="170" cover
                                 :src="item.img">
                                 <template v-slot:placeholder>
@@ -150,6 +207,15 @@
                                     </div>
                                 </template>
                             </v-img>
+                            <v-btn
+                              icon
+                              class="download-btn"
+                              size="small"
+                              style="position: absolute; top: 8px; right: 8px; background: #fff; color: #ff1744; box-shadow: 0 2px 8px rgba(0,0,0,0.12); z-index: 2;"
+                              @click.stop="downloadImage(item.img, item.menuName)"
+                            >
+                              <v-icon>mdi-download</v-icon>
+                            </v-btn>
                         </div>
                         <div class="  align-center pa-4">
                             <h4 class="">{{ item.menuName }}</h4>
@@ -166,7 +232,7 @@
         <!-- end -->
 
         <!-- Vegetable Dishes -->
-        <div id="vegetable" class=" div2nd my-5 px-5 mt-12" style=" text-align: center;">
+        <div v-if="!searchQuery" id="vegetable" class=" div2nd my-5 px-5 mt-12" style=" text-align: center;">
             <div class="text-body-1 font-weight-bold d-inline bg-red-accent-4 py-1 px-3 header-red ">
                 TASTY & AFFORDABLE
             </div>
@@ -177,11 +243,11 @@
         </div>
         <v-container>
             <v-row justify="center" align="center" class="">
-                <v-col cols="12" sm="6" md="4" v-for="(item, key) in data.VE" :key="item.menuCode"
+                <v-col cols="12" sm="6" md="4" v-for="(item, key) in filteredData.VE" :key="item.menuCode"
                     style="position: relative !important;">
                     <v-img v-if="item.isHot" class="best-seller" src="@/assets/best-seller.png" width="120" cover></v-img>
                     <v-card class="menu-card  menu-card align-center d-flex flex-row ">
-                        <div @click="dialog = true">
+                        <div style="position:relative; display: inline-block;" @click="dialog = true">
                             <v-img class="align-end text-white " aspect-ratio="1" height="170" width="170" cover
                                 :src="item.img">
                                 <template v-slot:placeholder>
@@ -190,6 +256,15 @@
                                     </div>
                                 </template>
                             </v-img>
+                            <v-btn
+                              icon
+                              class="download-btn"
+                              size="small"
+                              style="position: absolute; top: 8px; right: 8px; background: #fff; color: #ff1744; box-shadow: 0 2px 8px rgba(0,0,0,0.12); z-index: 2;"
+                              @click.stop="downloadImage(item.img, item.menuName)"
+                            >
+                              <v-icon>mdi-download</v-icon>
+                            </v-btn>
                         </div>
                         <div class="  align-center pa-4">
                             <h4 class="">{{ item.menuName }}</h4>
@@ -205,7 +280,7 @@
         <!-- end -->
 
         <!-- Dessert Dishes -->
-        <div id="dessert" class=" div2nd my-5 px-5 mt-12" style=" text-align: center;">
+        <div v-if="!searchQuery" id="dessert" class=" div2nd my-5 px-5 mt-12" style=" text-align: center;">
             <div class="text-body-1 font-weight-bold d-inline bg-red-accent-4 py-1 px-3 header-red ">
                 TASTY & AFFORDABLE
             </div>
@@ -216,11 +291,11 @@
         </div>
         <v-container>
             <v-row justify="center" align="center" class="">
-                <v-col cols="12" sm="6" md="4" v-for="(item, key) in data.MC" :key="item.menuCode"
+                <v-col cols="12" sm="6" md="4" v-for="(item, key) in filteredData.MC" :key="item.menuCode"
                     style="position: relative !important;">
                     <v-img v-if="item.isHot" class="best-seller" src="@/assets/best-seller.png" width="120" cover></v-img>
                     <v-card class="menu-card  menu-card align-center d-flex flex-row ">
-                        <div @click="dialog = true">
+                        <div style="position:relative; display: inline-block;" @click="dialog = true">
                             <v-img class="align-end text-white " aspect-ratio="1" height="170" width="170" cover
                                 :src="item.img">
                                 <template v-slot:placeholder>
@@ -229,6 +304,15 @@
                                     </div>
                                 </template>
                             </v-img>
+                            <v-btn
+                              icon
+                              class="download-btn"
+                              size="small"
+                              style="position: absolute; top: 8px; right: 8px; background: #fff; color: #ff1744; box-shadow: 0 2px 8px rgba(0,0,0,0.12); z-index: 2;"
+                              @click.stop="downloadImage(item.img, item.menuName)"
+                            >
+                              <v-icon>mdi-download</v-icon>
+                            </v-btn>
                         </div>
                         <div class="  align-center pa-4">
                             <h4 class="">{{ item.menuName }}</h4>
@@ -244,7 +328,7 @@
         <!-- end -->
 
         <!-- Seafood Dishes -->
-        <div id="seafood" class=" div2nd my-5 px-5 mt-12" style=" text-align: center;">
+        <div v-if="!searchQuery" id="seafood" class=" div2nd my-5 px-5 mt-12" style=" text-align: center;">
             <div class="text-body-1 font-weight-bold d-inline bg-red-accent-4 py-1 px-3 header-red ">
                 TASTY & AFFORDABLE
             </div>
@@ -255,11 +339,11 @@
         </div>
         <v-container>
             <v-row justify="center" align="center" class="">
-                <v-col cols="12" sm="6" md="4" v-for="(item, key) in data.SF" :key="item.menuCode"
+                <v-col cols="12" sm="6" md="4" v-for="(item, key) in filteredData.SF" :key="item.menuCode"
                     style="position: relative !important;">
                     <v-img v-if="item.isHot" class="best-seller" src="@/assets/best-seller.png" width="120" cover></v-img>
                     <v-card class="menu-card  menu-card align-center d-flex flex-row ">
-                        <div @click="dialog = true">
+                        <div style="position:relative; display: inline-block;" @click="dialog = true">
                             <v-img class="align-end text-white " aspect-ratio="1" height="170" width="170" cover
                                 :src="item.img">
                                 <template v-slot:placeholder>
@@ -268,6 +352,15 @@
                                     </div>
                                 </template>
                             </v-img>
+                            <v-btn
+                              icon
+                              class="download-btn"
+                              size="small"
+                              style="position: absolute; top: 8px; right: 8px; background: #fff; color: #ff1744; box-shadow: 0 2px 8px rgba(0,0,0,0.12); z-index: 2;"
+                              @click.stop="downloadImage(item.img, item.menuName)"
+                            >
+                              <v-icon>mdi-download</v-icon>
+                            </v-btn>
                         </div>
                         <div class="  align-center pa-4">
                             <h4 class="">{{ item.menuName }}</h4>
@@ -312,10 +405,10 @@
                     <v-icon icon="mdi-cake-variant"></v-icon>
                     <small class="text-caption">Dessert</small>
                 </div>
-                <div @click="navigateTo('seafood'); selectedCategory = 6" class="fixed-icons d-flex flex-column align-center"
+                <div @click="moreDialog = true; selectedCategory = 6" class="fixed-icons d-flex flex-column align-center"
                 :class="{ active: selectedCategory === 6 }">
-                    <v-icon icon="mdi-fish"></v-icon>
-                    <small class="text-caption">Seafood</small>
+                    <v-icon icon="mdi-dots-horizontal"></v-icon>
+                    <small class="text-caption">More</small>
                 </div>
             </div>
         </div>
@@ -328,6 +421,28 @@
                 <v-img class="align-end text-white " aspect-ratio="1" cover :src="img" />
                 <v-card-actions>
                     <v-btn prepend-icon="mdi-close" color="primary" block @click="dialog = false">Close</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+    </div>
+
+    <div class="text-center">
+        <v-dialog v-model="moreDialog" max-width="300">
+            <v-card>
+                <v-card-title class="headline">More Categories</v-card-title>
+                <v-card-text>
+                    <v-list>
+                        <v-list-item @click="navigateTo('beef'); moreDialog = false; selectedCategory = 8" prepend-icon="mdi-food-steak">
+                            <v-list-item-title>Beef Dishes</v-list-item-title>
+                        </v-list-item>
+                        <v-list-item @click="navigateTo('seafood'); moreDialog = false; selectedCategory = 9" prepend-icon="mdi-fish">
+                            <v-list-item-title>Seafood Dishes</v-list-item-title>
+                        </v-list-item>
+                    </v-list>
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="primary" @click="moreDialog = false">Close</v-btn>
                 </v-card-actions>
             </v-card>
         </v-dialog>
@@ -398,6 +513,7 @@ import { Skeletor } from 'vue-skeletor';
 const internalInstance = getCurrentInstance()
 const img = ref(null);
 const dialog = ref(false);
+const moreDialog = ref(false);
 const selectedCategory = ref(null);
 const fetching = ref(true);
 const timeout = ref(10000);
@@ -416,12 +532,24 @@ function OpenCart() {
 
 }
 function navigateTo(val) {
-    const myEl = document.getElementById(val)
-    smoothScroll({
-        scrollTo: myEl,
-        // duration: 500,
-        // offset: -50,
-    })
+    // Close the dialog first if it's open
+    if (moreDialog.value) {
+        moreDialog.value = false;
+    }
+
+    // Add a small delay to ensure the dialog has closed and DOM is stable
+    setTimeout(() => {
+        const myEl = document.getElementById(val);
+        if (myEl) {
+            smoothScroll({
+                scrollTo: myEl,
+                // duration: 500,
+                // offset: -50,
+            });
+        } else {
+            console.warn(`Element with ID "${val}" not found for scrolling.`);
+        }
+    }, 300); // Increased delay to 300ms
 }
 
 const filteredData = computed(() => {
@@ -493,16 +621,18 @@ onMounted(async () => {
 /* Download button */
 .download-btn {
   border-radius: 50% !important;
-  min-width: 32px !important;
-  min-height: 32px !important;
-  width: 32px !important;
-  height: 32px !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-  transition: background 0.2s, color 0.2s;
+  min-width: 36px !important; /* Increased size */
+  min-height: 36px !important; /* Increased size */
+  width: 36px !important; /* Increased size */
+  height: 36px !important; /* Increased size */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2); /* Slightly stronger shadow */
+  transition: background 0.3s ease, color 0.3s ease; /* Smoother transition */
   z-index: 2;
+  background: rgba(0, 0, 0, 0.4) !important; /* Semi-transparent dark background */
+  color: #fff !important; /* White icon */
 }
 .download-btn:hover {
-  background: #ff1744 !important;
+  background: #ff1744 !important; /* Keep the red accent on hover */
   color: #fff !important;
 }
 
