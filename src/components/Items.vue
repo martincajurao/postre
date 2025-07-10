@@ -58,7 +58,7 @@
         <v-col cols="4" class="pa-0" v-if="!isCombo">
           <div class="d-flex justify-end">
             <v-btn
-              @click="removeQty({ ...data, buyQty: Number(data.buyQty), selectedSize: selectedSize.value });"
+              @click="cartStore.decrementItemQty(data.menuCode, isCombo ? selectedCombo.name : null)"
               :disabled="data.buyQty <= 1"
               size="small"
               class="text-caption"
@@ -72,7 +72,7 @@
               style="width: 20px;"
             />
             <v-btn
-              @click="emitter.emit('add-qty', { ...data, buyQty: Number(data.buyQty), selectedSize: selectedSize.value });"
+              @click="cartStore.incrementItemQty(data.menuCode, isCombo ? selectedCombo.name : null)"
               size="small"
               density="compact"
               icon="mdi-plus"
@@ -86,9 +86,11 @@
 </template>
 <script setup>
 import { inject, onMounted, ref, computed, watch, defineEmits } from 'vue';
+import { useCartStore } from '@/stores/cart';
 
 const emit = defineEmits(['update-selected-size']);
 const emitter = inject('emitter');
+const cartStore = useCartStore();
 const selected = ref([]);
 const selectedSize = ref('medium'); // Reintroduce local ref
 

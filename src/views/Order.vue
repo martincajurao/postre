@@ -387,23 +387,18 @@ const itemsArray = ref([])
 // const allSelected = ref(false);
 
 function getItemPrice(item) {
-  console.log('DEBUG: getItemPrice called with item:', item);
   // If menuPrice is an object with size-specific prices
   if (typeof item.menuPrice === 'object' && item.menuPrice !== null) {
     if (item.selectedSize && item.menuPrice[item.selectedSize]) {
-      console.log(`DEBUG: Price for selectedSize '${item.selectedSize}':`, item.menuPrice[item.selectedSize]);
       return Number(item.menuPrice[item.selectedSize]);
     }
     // Fallback to 'medium' if selectedSize is not found or not set
     if (item.menuPrice.medium) {
-      console.log(`DEBUG: Price for 'medium' fallback:`, item.menuPrice.medium);
       return Number(item.menuPrice.medium);
     }
-    console.log('DEBUG: No valid price found in object, returning 0.');
     return 0; // Default to 0 if no valid price found in object
   }
   // If menuPrice is a single numeric price
-  console.log('DEBUG: Single numeric price:', item.menuPrice);
   return Number(item.menuPrice);
 }
 
@@ -441,41 +436,6 @@ onMounted(() => {
         dialog.value = false;
         combo.value[val.name] = val;
     });
-    emitter.on('add-qty', (val) => {
-        if (val.menuCode && items.value[val.menuCode]) {
-            // Ensure buyQty is a number and increment
-            items.value[val.menuCode].buyQty = Number(items.value[val.menuCode].buyQty) + 1;
-            // Store the selectedSize from the emitted value
-            items.value[val.menuCode].selectedSize = val.selectedSize;
-        } else if (val.name && combo.value[val.name]) {
-            const comboItem = combo.value[val.name];
-            for (const key in comboItem.members) {
-                if (comboItem.members[key].menuCode === val.menuCode) {
-                    comboItem.members[key].buyQty = Number(comboItem.members[key].buyQty) + 1;
-                    // Store selectedSize for combo members too if applicable
-                    comboItem.members[key].selectedSize = val.selectedSize;
-                    break;
-                }
-            }
-        }
-        ; // Trigger UI update
-    });
-    emitter.on('remove-qty', (val) => {
-        if (val.menuCode && items.value[val.menuCode]) {
-            items.value[val.menuCode].buyQty = Math.max(1, Number(items.value[val.menuCode].buyQty) - 1);
-            items.value[val.menuCode].selectedSize = val.selectedSize;
-        } else if (val.name && combo.value[val.name]) {
-            const comboItem = combo.value[val.name];
-            for (const key in comboItem.members) {
-                if (comboItem.members[key].menuCode === val.menuCode) {
-                    comboItem.members[key].buyQty = Math.max(1, Number(comboItem.members[key].buyQty) - 1);
-                    comboItem.members[key].selectedSize = val.selectedSize;
-                    break;
-                }
-            }
-        }
-        ; // Trigger UI update
-    });
     emitter.on('change-menu', (val) => {   // *Listen* for event
         changedialog.value = true
         changeMenuData.value = {}
@@ -502,7 +462,6 @@ onMounted(() => {
 })
 
 function addItemWithDefaultSize(item) {
-    console.log('DEBUG: addItemWithDefaultSize - incoming item:', item);
     // Ensure item is an object before proceeding
     if (typeof item !== 'object' || item === null || !item.menuCode) {
         console.warn('DEBUG: addItemWithDefaultSize - Invalid item received, skipping:', item);
@@ -531,7 +490,6 @@ function addItemWithDefaultSize(item) {
 
     // Add the item to the reactive items object
     items.value[newItem.menuCode] = newItem;
-    console.log('DEBUG: addItemWithDefaultSize - items.value after adding new item:', items.value);
 
     menudialog.value = false;
     

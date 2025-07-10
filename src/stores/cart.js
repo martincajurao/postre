@@ -25,9 +25,31 @@ export const useCartStore = defineStore('cart', () => {
     console.log("DEBUG: cartStore.items after addItem:", items.value);
   }
 
-  function incrementItemQty(menuCode) {
-    if (items.value[menuCode]) {
+  function incrementItemQty(menuCode, comboName = null) {
+    if (comboName && combo.value[comboName]) {
+      const comboItem = combo.value[comboName];
+      for (const key in comboItem.members) {
+        if (comboItem.members[key].menuCode === menuCode) {
+          comboItem.members[key].buyQty = Number(comboItem.members[key].buyQty) + 1;
+          break;
+        }
+      }
+    } else if (items.value[menuCode]) {
       items.value[menuCode].buyQty++;
+    }
+  }
+
+  function decrementItemQty(menuCode, comboName = null) {
+    if (comboName && combo.value[comboName]) {
+      const comboItem = combo.value[comboName];
+      for (const key in comboItem.members) {
+        if (comboItem.members[key].menuCode === menuCode) {
+          comboItem.members[key].buyQty = Math.max(1, Number(comboItem.members[key].buyQty) - 1);
+          break;
+        }
+      }
+    } else if (items.value[menuCode]) {
+      items.value[menuCode].buyQty = Math.max(1, items.value[menuCode].buyQty - 1);
     }
   }
 
@@ -45,6 +67,7 @@ export const useCartStore = defineStore('cart', () => {
     orders,
     addItem, // Expose addItem
     incrementItemQty, // Expose incrementItemQty
+    decrementItemQty, // Expose decrementItemQty
     clearItems, // Expose clearItems
     clearCombo, // Expose clearCombo
   };

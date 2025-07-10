@@ -120,28 +120,21 @@ const comboList = computed(() => {
 
 
 function getComboPrice(combo) {
-  console.log("DEBUG: getComboPrice - processing combo:", combo);
   if (!combo || !combo.members) {
-    console.log("DEBUG: getComboPrice - combo or members missing, returning 0.");
     return 0;
   }
   return Object.values(combo.members).reduce((sum, member) => {
-    console.log("DEBUG: getComboPrice - processing member:", member);
     let price = 0;
     if (typeof member.menuPrice === 'object' && member.menuPrice !== null) {
       price = Number(member.menuPrice.medium || 0);
-      console.log(`DEBUG: getComboPrice - member ${member.menuName} (object price), medium price: ${price}`);
     } else if (!isNaN(member.menuPrice)) {
       price = Number(member.menuPrice);
-      console.log(`DEBUG: getComboPrice - member ${member.menuName} (single price): ${price}`);
     }
-    console.log(`DEBUG: getComboPrice - current sum: ${sum}, adding price: ${price}`);
     return sum + price;
   }, 0);
 }
 
 function AddCombo(combo) {
-    console.log("DEBUG: AddCombo - incoming combo:", combo);
     // Create a deep copy to avoid mutating the original prop
     const comboToAdd = JSON.parse(JSON.stringify(combo));
 
@@ -154,11 +147,9 @@ function AddCombo(combo) {
             } else {
                 member.selectedSize = null;
             }
-            console.log('DEBUG: AddCombo - Combo member after processing:', member);
         });
     }
     comboToAdd.disc = Number(comboToAdd.disc || 0); // Ensure discount is a number
-    console.log('DEBUG: AddCombo - Combo to add to cart (before emitting):', comboToAdd);
     cartStore.combo[comboToAdd.name] = comboToAdd;
     emitter.emit('add-combo', comboToAdd); // Emit the processed combo
     
