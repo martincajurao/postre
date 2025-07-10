@@ -58,16 +58,13 @@
                 </div>
               </v-card-text>
               <v-divider class="mx-4 mb-1"></v-divider>
-              <!-- Commented out v-card-actions -->
-              <!--
               <v-card-actions class="px-4 pb-4 pt-3">
                 <v-btn  prepend-icon="mdi-cart" class=" px-3"  color="#DF2C00" variant="flat" @click="AddCombo(item)">
                   order
                 </v-btn>
                 <v-spacer></v-spacer>
-                <h3 class="text-h4"> &#8369;{{Number(item.price).toLocaleString()}}</h3>
+                <h3 class="text-h4"> &#8369;{{Number(getComboPrice(item)).toLocaleString()}}</h3>
               </v-card-actions>
-              -->
             </v-card>
           </v-col>
 
@@ -122,11 +119,49 @@ const comboList = computed(() => {
 });
 
 
-function AddCombo(val) {
-    // Use cartStore.combo instead of gVar.combo
-    cartStore.combo[val.name] = val;
-    emitter.emit('add-combo', val);
-    emitter.emit('add-per-menu', 1);
+function getComboPrice(combo) {
+  console.log("DEBUG: getComboPrice - processing combo:", combo);
+  if (!combo || !combo.members) {
+    console.log("DEBUG: getComboPrice - combo or members missing, returning 0.");
+    return 0;
+  }
+  return Object.values(combo.members).reduce((sum, member) => {
+    console.log("DEBUG: getComboPrice - processing member:", member);
+    let price = 0;
+    if (typeof member.menuPrice === 'object' && member.menuPrice !== null) {
+      price = Number(member.menuPrice.medium || 0);
+      console.log(`DEBUG: getComboPrice - member ${member.menuName} (object price), medium price: ${price}`);
+    } else if (!isNaN(member.menuPrice)) {
+      price = Number(member.menuPrice);
+      console.log(`DEBUG: getComboPrice - member ${member.menuName} (single price): ${price}`);
+    }
+    console.log(`DEBUG: getComboPrice - current sum: ${sum}, adding price: ${price}`);
+    return sum + price;
+  }, 0);
+}
+
+function AddCombo(combo) {
+    console.log("DEBUG: AddCombo - incoming combo:", combo);
+    // Create a deep copy to avoid mutating the original prop
+    const comboToAdd = JSON.parse(JSON.stringify(combo));
+
+    // Ensure all members have default properties for calculation
+    if (comboToAdd.members && typeof comboToAdd.members === 'object') {
+        Object.values(comboToAdd.members).forEach(member => {
+            member.buyQty = 1; // Default quantity
+            if (typeof member.menuPrice === 'object' && member.menuPrice !== null) {
+                member.selectedSize = member.menuPrice.medium ? 'medium' : Object.keys(member.menuPrice)[0];
+            } else {
+                member.selectedSize = null;
+            }
+            console.log('DEBUG: AddCombo - Combo member after processing:', member);
+        });
+    }
+    comboToAdd.disc = Number(comboToAdd.disc || 0); // Ensure discount is a number
+    console.log('DEBUG: AddCombo - Combo to add to cart (before emitting):', comboToAdd);
+    cartStore.combo[comboToAdd.name] = comboToAdd;
+    emitter.emit('add-combo', comboToAdd); // Emit the processed combo
+    
 }
 </script>
 <style lang="scss">

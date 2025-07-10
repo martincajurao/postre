@@ -22,6 +22,7 @@ export const useCartStore = defineStore('cart', () => {
         buyQty: 1,
       };
     }
+    console.log("DEBUG: cartStore.items after addItem:", items.value);
   }
 
   function incrementItemQty(menuCode) {
@@ -30,11 +31,21 @@ export const useCartStore = defineStore('cart', () => {
     }
   }
 
+  function clearItems() {
+    items.value = {};
+  }
+
+  function clearCombo() {
+    combo.value = {};
+  }
+
   return {
     items,
     combo,
     orders,
     addItem, // Expose addItem
     incrementItemQty, // Expose incrementItemQty
+    clearItems, // Expose clearItems
+    clearCombo, // Expose clearCombo
   };
 });

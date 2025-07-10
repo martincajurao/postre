@@ -34,110 +34,112 @@
     </template>
 
     <template v-else-if="!fetching && Object.keys(data).length > 0">
-      <div
-        v-for="category in menuCategories"
-        :key="category.id"
-        :id="category.id"
-        class="div2nd my-5 px-5 mt-12"
-        style="text-align: center;"
-      >
-        <div class="text-body-1 font-weight-bold d-inline bg-red-accent-4 py-1 px-3 header-red">
-          TASTY & AFFORDABLE
-        </div>
-        <h1 class="text-h2">{{ category.name }}</h1>
-        <v-card-subtitle>
-          <span>{{ category.description }}</span>
-        </v-card-subtitle>
+      <div> <!-- Added wrapper div -->
+        <div
+          v-for="category in menuCategories"
+          :key="category.id"
+          :id="category.id"
+          class="div2nd my-5 px-5 mt-12"
+          style="text-align: center;"
+        >
+          <div class="text-body-1 font-weight-bold d-inline bg-red-accent-4 py-1 px-3 header-red">
+            TASTY & AFFORDABLE
+          </div>
+          <h1 class="text-h2">{{ category.name }}</h1>
+          <v-card-subtitle>
+            <span>{{ category.description }}</span>
+          </v-card-subtitle>
 
-        <v-container>
-          <v-row justify="center" align="center" v-if="data[category.code] && typeof data[category.code] === 'object'">
-            <v-col
-              v-for="item in (data[category.code] || {})"
-              :key="item.menuCode"
-              cols="12"
-              sm="6"
-              md="4"
-              style="position: relative !important;"
-            >
-              <template v-if="!itemSizes[item.menuCode]">
-                {{ itemSizes[item.menuCode] = 'medium' }}
-              </template>
-              <v-img
-                v-if="item.isHot"
-                class="best-seller"
-                src="@/assets/best-seller.png"
-                width="120"
-                cover
-              ></v-img>
-              <v-card class="menu-card align-center d-flex flex-row">
-                <div style="position:relative; display: inline-block;" @click="dialog = true">
-                  <v-img
-                    class="align-end text-white"
-                    aspect-ratio="1"
-                    height="170"
-                    width="170"
-                    cover
-                    :src="item.img"
-                  >
-                    <template v-slot:placeholder>
-                      <div class="d-flex align-center justify-center fill-height">
-                        <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
-                      </div>
-                    </template>
-                  </v-img>
-                  <v-btn
-                    icon
-                    class="download-btn"
-                    size="small"
-                    style="position: absolute; top: 8px; right: 8px; background: #fff; color: #ff1744; box-shadow: 0 2px 8px rgba(0,0,0,0.12); z-index: 2;"
-                    @click.stop="downloadImage(item.img, item.menuName)"
-                  >
-                    <v-icon>mdi-download</v-icon>
-                  </v-btn>
-                </div>
-                <div class="align-center pa-4">
-                  <h4>{{ item.menuName }}</h4>
-                  <div class="text-grey-lighten-1 text-caption">{{ item.menuDesc }}</div>
+          <v-container>
+            <v-row justify="center" align="center" v-if="data[category.code] && typeof data[category.code] === 'object'">
+              <v-col
+                v-for="item in (data[category.code] || {})"
+                :key="item.menuCode"
+                cols="12"
+                sm="6"
+                md="4"
+                style="position: relative !important;"
+              >
+                <template v-if="!itemSizes[item.menuCode]">
+                  {{ itemSizes[item.menuCode] = 'medium' }}
+                </template>
+                <v-img
+                  v-if="item.isHot"
+                  class="best-seller"
+                  src="@/assets/best-seller.png"
+                  width="120"
+                  cover
+                ></v-img>
+                <v-card class="menu-card align-center d-flex flex-row">
+                  <div style="position:relative; display: inline-block;" @click="dialog = true">
+                    <v-img
+                      class="align-end text-white"
+                      aspect-ratio="1"
+                      height="170"
+                      width="170"
+                      cover
+                      :src="item.img"
+                    >
+                      <template v-slot:placeholder>
+                        <div class="d-flex align-center justify-center fill-height">
+                          <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
+                        </div>
+                      </template>
+                    </v-img>
+                    <v-btn
+                      icon
+                      class="download-btn"
+                      size="small"
+                      style="position: absolute; top: 8px; right: 8px; background: #fff; color: #ff1744; box-shadow: 0 2px 8px rgba(0,0,0,0.12); z-index: 2;"
+                      @click.stop="downloadImage(item.img, item.menuName)"
+                    >
+                      <v-icon>mdi-download</v-icon>
+                    </v-btn>
+                  </div>
+                  <div class="align-center pa-4">
+                    <h4>{{ item.menuName }}</h4>
+                    <div class="text-grey-lighten-1 text-caption">{{ item.menuDesc }}</div>
 <h5 class="my-2">
   Php {{ typeof getCurrentPrice(item) === 'number' ? Number(getCurrentPrice(item)).toLocaleString() : '' }}
   <span v-if="item.menuPrices" class="text-caption ml-2">
     ({{ itemSizes[item.menuCode] === 'medium' ? 'Medium' : 'Large' }})
   </span>
 </h5>
-                  <div class="d-flex align-center mt-1" v-if="item.menuPrice && typeof item.menuPrice === 'object'">
-                    <v-menu offset-y>
-                      <template v-slot:activator="{ props }">
-                        <v-btn v-bind="props" density="compact" size="small">
-                          {{ itemSizes[item.menuCode] === 'medium' ? 'Medium' : 'Large' }}
-                          <v-icon right>mdi-chevron-down</v-icon>
-                        </v-btn>
-                      </template>
-                      <v-list>
-                        <v-list-item @click="itemSizes[item.menuCode] = 'medium'">
-                          <v-list-item-title>Medium</v-list-item-title>
-                        </v-list-item>
-                        <v-list-item @click="itemSizes[item.menuCode] = 'large'">
-                          <v-list-item-title>Large</v-list-item-title>
-                        </v-list-item>
-                      </v-list>
-                    </v-menu>
+                    <div class="d-flex align-center mt-1" v-if="item.menuPrice && typeof item.menuPrice === 'object'">
+                      <v-menu offset-y>
+                        <template v-slot:activator="{ props }">
+                          <v-btn v-bind="props" density="compact" size="small">
+                            {{ itemSizes[item.menuCode] === 'medium' ? 'Medium' : 'Large' }}
+                            <v-icon right>mdi-chevron-down</v-icon>
+                          </v-btn>
+                        </template>
+                        <v-list>
+                          <v-list-item @click="itemSizes[item.menuCode] = 'medium'">
+                            <v-list-item-title>Medium</v-list-item-title>
+                          </v-list-item>
+                          <v-list-item @click="itemSizes[item.menuCode] = 'large'">
+                            <v-list-item-title>Large</v-list-item-title>
+                          </v-list-item>
+                        </v-list>
+                      </v-menu>
+                    </div>
+                    <v-btn
+                      @click="AddToCart(item, itemSizes[item.menuCode], getCurrentPrice(item))"
+                      class="mt-1 text-subtitle-2"
+                      density="comfortable"
+                      prepend-icon="mdi-cart"
+                      color="amber"
+                      variant="outlined"
+                    >
+                      Add to order
+                    </v-btn>
                   </div>
-                  <v-btn
-                    @click="AddToCart(item, itemSizes[item.menuCode], getCurrentPrice(item))"
-                    class="mt-1 text-subtitle-2"
-                    density="comfortable"
-                    prepend-icon="mdi-cart"
-                    color="amber"
-                    variant="outlined"
-                  >
-                    Add to order
-                  </v-btn>
-                </div>
-              </v-card>
-            </v-col>
-          </v-row>
-        </v-container>
-      </div>
+                </v-card>
+              </v-col>
+            </v-row>
+          </v-container>
+        </div>
+      </div> <!-- Closing wrapper div -->
     </template>
 
     <div class="btm-fix py-2 bg-black" style="z-index: 1;">
@@ -305,8 +307,9 @@ function getCurrentPrice(item) {
 }
 
 function AddToCart(val, selectedSize, currentPrice) {
-  // Minimal stub implementation
-  console.log("AddToCart called", val, selectedSize, currentPrice);
+  console.log("DEBUG: AddToCart - item being added:", val);
+  console.log("DEBUG: AddToCart - selectedSize:", selectedSize);
+  console.log("DEBUG: AddToCart - currentPrice:", currentPrice);
   cartStore.addItem(val, selectedSize, currentPrice);
 }
 

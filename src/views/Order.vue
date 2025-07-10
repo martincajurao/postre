@@ -43,12 +43,12 @@
                         <div>
                             <v-btn @click="dialog = true" density="comfortable" variant="flat" size="small" class="mr-2"
                                 icon="mdi-plus"></v-btn>
-                            <v-btn @click="emitter.emit('remove', Object.keys(combo).length); combo = {}; cartStore.combo = {}"
+                            <v-btn @click="cartStore.clearCombo()"
                                 density="comfortable" variant="flat" size="small" icon="mdi-delete-empty"></v-btn>
                         </div>
                     </div>
                     <TransitionGroup name="list" tag="ul">
-                        <div v-for="item in combo">
+                        <div v-for="item in Object.values(combo)" :key="item.name">
                             <v-divider class="mt-6"></v-divider>
                             <div class="d-flex align-center justify-space-between">
                                 <!-- <v-checkbox :label="item.desc" class="text-body-2 d-inline-flex font-weight-bold">
@@ -65,7 +65,7 @@
                                 <v-btn @click="emitter.emit('remove', 1); delete combo[item.name]" density="comfortable"
                                     variant="text" size="small" icon="mdi-delete-empty"></v-btn>
                             </div>
-                            <div v-for="menuitem, selectedkey in item.members">
+                            <div v-for="menuitem, selectedkey in item.members" :key="menuitem.menuCode">
                                 <Item :data="menuitem" :isCombo="true" :selectedCombo=item :selectedkey=selectedkey />
                             </div>
                         </div>
@@ -77,16 +77,21 @@
                         <v-spacer></v-spacer>
                         <v-btn @click="OpenMenu(); menudialog = true" variant="flat" class="mr-2" size="small"
                             density="comfortable" icon> <v-icon>mdi-plus</v-icon> </v-btn>
-                        <v-btn @click="emitter.emit('remove', Object.keys(items).length); items = {}; cartStore.items = {}"
+                        <v-btn @click="cartStore.clearItems()"
                             variant="flat" size="small" density="comfortable" icon> <v-icon>mdi-delete-empty</v-icon>
                         </v-btn>
                     </div>
                     <!-- <v-checkbox @click="selectAll" v-model="allSelected">Select all</v-checkbox> -->
-                    <TransitionGroup name="list" tag="ul">
-                        <div v-for="item in items" :key="item.menuCode">
-<Item :data="item" @update-selected-size="updateItemSize" :key="item.menuCode" />
-                        </div>
-                    </TransitionGroup>
+                    <template v-if="Object.values(items).length > 0">
+                        <TransitionGroup name="list" tag="ul">
+                            <div v-for="item in Object.values(items)" :key="item.menuCode">
+                                <Item :data="item" @update-selected-size="updateItemSize" :key="item.menuCode" />
+                            </div>
+                        </TransitionGroup>
+                    </template>
+                    <template v-else>
+                        <p class="text-center text-grey-lighten-1 my-4">No individual items in cart.</p>
+                    </template>
                 </v-responsive>
             </v-col>
             <v-col class="" cols="12" sm="4"
@@ -327,33 +332,42 @@ const cartStore = useCartStore(); // Initialize the store
 // Replace local refs with store state
 const { combo, items } = storeToRefs(cartStore);
 
-const itemSizes = ref({}) // Track selected size per item
 const df = ref(0);
 
 const itemsCount = computed(() => {
-  return Object.values(items.value).reduce((sum, item) => sum + Number(item.buyQty), 0);
+  return Object.keys(items.value).length;
 });
 
 const permenusub = computed(() => {
   return Object.values(items.value).reduce((sum, item) => {
     const price = getItemPrice(item);
     const qty = Number(item.buyQty);
+    if (isNaN(price) || isNaN(qty)) {
+      return sum; // Skip this item if price or qty is NaN
+    }
     return sum + (price * qty);
   }, 0);
 });
 
 const combosub = computed(() => {
   return Object.values(combo.value).reduce((sum, comboItem) => {
-    return sum + Object.values(comboItem.members).reduce((memberSum, member) => {
+    const comboMembersSubtotal = Object.values(comboItem.members).reduce((memberSum, member) => {
       const price = getItemPrice(member);
       const qty = Number(member.buyQty);
+      if (isNaN(price) || isNaN(qty)) {
+        return memberSum; // Skip this member if price or qty is NaN
+      }
       return memberSum + (price * qty);
     }, 0);
+    return sum + comboMembersSubtotal;
   }, 0);
 });
 
 const disc = computed(() => {
-  return Object.values(combo.value).reduce((sum, comboItem) => sum + Number(comboItem.disc), 0);
+  return Object.values(combo.value).reduce((sum, comboItem) => {
+    const discount = Number(comboItem.disc);
+    return sum + discount;
+  }, 0);
 });
 
 
@@ -373,18 +387,23 @@ const itemsArray = ref([])
 // const allSelected = ref(false);
 
 function getItemPrice(item) {
+  console.log('DEBUG: getItemPrice called with item:', item);
   // If menuPrice is an object with size-specific prices
   if (typeof item.menuPrice === 'object' && item.menuPrice !== null) {
     if (item.selectedSize && item.menuPrice[item.selectedSize]) {
+      console.log(`DEBUG: Price for selectedSize '${item.selectedSize}':`, item.menuPrice[item.selectedSize]);
       return Number(item.menuPrice[item.selectedSize]);
     }
     // Fallback to 'medium' if selectedSize is not found or not set
     if (item.menuPrice.medium) {
+      console.log(`DEBUG: Price for 'medium' fallback:`, item.menuPrice.medium);
       return Number(item.menuPrice.medium);
     }
+    console.log('DEBUG: No valid price found in object, returning 0.');
     return 0; // Default to 0 if no valid price found in object
   }
   // If menuPrice is a single numeric price
+  console.log('DEBUG: Single numeric price:', item.menuPrice);
   return Number(item.menuPrice);
 }
 
@@ -406,11 +425,8 @@ const computedtotal = computed(() => {
 // }
 
 onMounted(() => {
-    // combo.value = internalInstance.appContext.config.globalProperties.gVar.combo
-    // items.value = internalInstance.appContext.config.globalProperties.gVar.items
     const que = query(fireRef(db, 'Combo'));
     const q = query(fireRef(db, 'MenuCategory'));
-    console.log('COMBO', combo.value)
 
     get(q).then((snapshot) => {
         menuData.value = snapshot.val()
@@ -418,15 +434,12 @@ onMounted(() => {
     get(que).then((snapshot) => {
         data.value = snapshot.val()
     })
-    emitter.on('remove-item', (val) => {   // *Listen* for event
+        emitter.on('remove-item', (val) => {   // *Listen* for event
         delete items.value[val]
-        // internalInstance.appContext.config.globalProperties.gVar.items = items.value
     });
     emitter.on('add-combo', (val) => {   // *Listen* for event
         dialog.value = false;
         combo.value[val.name] = val;
-        console.log('COMBO', combo.value)
-        updateKey.value += 1
     });
     emitter.on('add-qty', (val) => {
         if (val.menuCode && items.value[val.menuCode]) {
@@ -445,7 +458,7 @@ onMounted(() => {
                 }
             }
         }
-        updateKey.value += 1; // Trigger UI update
+        ; // Trigger UI update
     });
     emitter.on('remove-qty', (val) => {
         if (val.menuCode && items.value[val.menuCode]) {
@@ -461,7 +474,7 @@ onMounted(() => {
                 }
             }
         }
-        updateKey.value += 1; // Trigger UI update
+        ; // Trigger UI update
     });
     emitter.on('change-menu', (val) => {   // *Listen* for event
         changedialog.value = true
@@ -472,12 +485,11 @@ onMounted(() => {
         get(q).then((snapshot) => {
             changeMenuData.value = snapshot.val()
         })
-        console.log(selectedchange.value)
     });
 
     // selected.value = items
     // emitter.on('check-item', (val) => {   // *Listen* for event
-    //     const s = selecteditems.value.includes(val)
+    //     const s = selecteditems.value.filter(e => e !== val)
     //     if (s) {
     //         var filteredArray = selecteditems.value.filter(e => e !== val)
     //         selecteditems.value=filteredArray
@@ -490,6 +502,13 @@ onMounted(() => {
 })
 
 function addItemWithDefaultSize(item) {
+    console.log('DEBUG: addItemWithDefaultSize - incoming item:', item);
+    // Ensure item is an object before proceeding
+    if (typeof item !== 'object' || item === null || !item.menuCode) {
+        console.warn('DEBUG: addItemWithDefaultSize - Invalid item received, skipping:', item);
+        return;
+    }
+
     // Clone item to avoid direct mutation of original data
     const newItem = { ...item };
     // Ensure buyQty is initialized as a number
@@ -512,9 +531,10 @@ function addItemWithDefaultSize(item) {
 
     // Add the item to the reactive items object
     items.value[newItem.menuCode] = newItem;
+    console.log('DEBUG: addItemWithDefaultSize - items.value after adding new item:', items.value);
 
     menudialog.value = false;
-    emitter.emit('add-per-menu', 1); // This event seems to be for updating a count, not directly related to item addition
+    
 }
 function OpenMenu() {
     const que = query(fireRef(db, 'MenuCategory'));

@@ -42,12 +42,28 @@ const shakeCart = ref(false)
 const cartExpanded = ref(false)
 
 watch(() => Object.keys(cartStore.items).length, (newCount, oldCount) => {
+  console.log("DEBUG: FloatingCart - cartStore.items count changed from", oldCount, "to", newCount);
   if (newCount > oldCount && !cartExpanded.value) {
     triggerShake();
   }
 });
 
-const cartItems = computed(() => Object.keys(cartStore.items).length)
+const cartItems = computed(() => {
+  let totalItems = 0;
+  // Sum individual items
+  for (const item of Object.values(cartStore.items)) {
+    totalItems += Number(item.buyQty || 0);
+  }
+  // Sum combo items
+  for (const combo of Object.values(cartStore.combo)) {
+    if (combo.members) {
+      for (const member of Object.values(combo.members)) {
+        totalItems += Number(member.buyQty || 0);
+      }
+    }
+  }
+  return totalItems;
+})
 
 const isOrderOrConfirmPage = computed(() => {
   const routeName = router.currentRoute.value.name;

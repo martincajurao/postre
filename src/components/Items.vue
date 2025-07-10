@@ -7,19 +7,10 @@
     </div>
     <div class="mr-1">
       <v-img
-        class="align-end text-white "
-        aspect-ratio="1"
         height="70"
         width="70"
-        cover
         :src="data.img"
-      >
-        <template v-slot:placeholder>
-          <div class="d-flex align-center justify-center fill-height">
-            <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
-          </div>
-        </template>
-      </v-img>
+      ></v-img>
     </div>
     <div class=" mx-3  w-100">
       <div class="d-flex justify-space-between">
