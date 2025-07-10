@@ -131,7 +131,7 @@ function getComboPrice(combo) {
       price = Number(member.menuPrice);
     }
     return sum + price;
-  }, 0);
+  }, 0) - Number(combo.disc || 0);
 }
 
 function AddCombo(combo) {

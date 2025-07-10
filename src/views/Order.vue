@@ -131,8 +131,7 @@
                     <table class="w-100">
                         <tr>
                             <td class="text-grey text-body-2">Amount to pay</td>
-                            <td class="text-right text-h4 text-warning "><span>&#8369;</span> {{ (computedtotal -
-                                disc).toLocaleString('en-US') }}</td>
+                            <td class="text-right text-h4 text-warning "><span>&#8369;</span> {{ computedtotal.toLocaleString('en-US') }}</td>
                         </tr>
                     </table>
                     <v-btn to="Confirm" @click="Checkout()" block="" color="red-accent-4"
