@@ -84,14 +84,16 @@
 </template>
 
 <script setup>
-import { inject, ref, computed, onMounted, onBeforeUnmount, getCurrentInstance, reactive } from 'vue'
+import { inject, ref, computed, onMounted, onBeforeUnmount, getCurrentInstance } from 'vue' // Removed reactive
+import { useCartStore } from '@/stores/cart'; // Import the Pinia store
 
 const scrollPosition = ref(null)
 const mobile = ref(null)
 const mobileNav = ref(null)
 const activeTab = ref(false)
 const windowWidth = ref(null)
-const cart = reactive({ items: 0 })
+
+const cartStore = useCartStore(); // Initialize the store
 const branches = ref([
   { id: 'naga', name: 'Naga' },
   { id: 'calbayog', name: 'Calbayog' },
@@ -138,7 +140,7 @@ function setActive(val, refName) {
   mobileNav.value = false;
 }
 
-const cartItems = computed(() => cart.items)
+const cartItems = computed(() => cartStore.items.itemsCount || 0)
 
 onMounted(() => {
   window.addEventListener('resize', checkScreen)
@@ -147,15 +149,17 @@ onMounted(() => {
   // Sync cartItems to global for FloatingCart
   const internalInstance = getCurrentInstance();
   if (internalInstance) {
-    internalInstance.appContext.config.globalProperties.cartItemsRef = cart
+    internalInstance.appContext.config.globalProperties.cartItemsRef = cartStore.items // Use cartStore.items
   }
   const emitter = inject('emitter')
   if (emitter) {
     emitter.on('add-per-menu', (value) => {
-      cart.items += value
+      // Assuming cartStore.items is an object where you want to track total items
+      // You might need to adjust this based on how you want to count items in the store
+      cartStore.items.itemsCount = (cartStore.items.itemsCount || 0) + value; // Update cartStore.items
     })
     emitter.on('remove', (value) => {
-      cart.items -= value
+      cartStore.items.itemsCount = Math.max(0, (cartStore.items.itemsCount || 0) - value); // Update cartStore.items
     })
   }
 })

@@ -31,14 +31,23 @@
 </template>
 
 <script setup>
-import { ref, inject, onMounted, computed } from 'vue'
+import { ref, inject, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useCartStore } from '@/stores/cart'
 
 const emitter = inject('emitter')
 const router = useRouter()
-const cartItems = ref(0)
+const cartStore = useCartStore()
 const shakeCart = ref(false)
 const cartExpanded = ref(false)
+
+watch(() => Object.keys(cartStore.items).length, (newCount, oldCount) => {
+  if (newCount > oldCount && !cartExpanded.value) {
+    triggerShake();
+  }
+});
+
+const cartItems = computed(() => Object.keys(cartStore.items).length)
 
 const isOrderOrConfirmPage = computed(() => {
   const routeName = router.currentRoute.value.name;
@@ -62,17 +71,7 @@ function triggerShake() {
 }
 
 onMounted(() => {
-  if (emitter) {
-    emitter.on('add-per-menu', (value) => {
-      cartItems.value += value;
-      if (!cartExpanded.value) {
-        triggerShake();
-      }
-    });
-    emitter.on('remove', (value) => {
-      cartItems.value -= value;
-    });
-  }
+  // No longer need emitter listeners as cartItems is now derived from cartStore
 });
 
 </script>

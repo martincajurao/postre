@@ -86,6 +86,7 @@ onMounted(() => {
   const $smoothScroll = getCurrentInstance()?.proxy?.$smoothScroll;
 
   emitter.on('scroll-to', (refName) => {
+    console.log('Scroll-to event received:', refName); // Add this line
     let element;
     if (refName === 'home') element = home.value;
     if (refName === 'offer') element = offer.value;

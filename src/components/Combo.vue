@@ -1,7 +1,7 @@
 <template lang="">
         <v-container>
         <v-row class="d-flex align-center">
-<v-col cols="12" sm="6" md="4" v-for="item in comboList" style="position:relative">
+<v-col cols="12" sm="6" md="4" v-for="item in comboList" :key="item.name" style="position:relative">
 
             <v-img class="best-seller" src="@/assets/best-seller.png" width="150" cover ></v-img>
 
@@ -37,17 +37,20 @@
                 <v-chip class="mt-1" size="small" color="green-accent-4">Save &#8369;{{Number(item.disc).toLocaleString()}}
                 </v-chip>
               </v-card-item>
+              <!-- Uncommented v-card-text -->
               <v-card-text>
                 <div class=" text-grey-lighten-1">
                   <h4 class="text-body-2 "> Package Inclusion:</h4>
                   <div class=" d-flex flex-wrap justify-start">
                     <div class="text-body-2 mr-1 mt-2" v-for="member in item.members">
                       <v-tooltip >
-                        <div class="mt-2">
-                          <img  height="150" cover :src="member.img" alt="">
+                        <div class="mt-2" v-if="member.img"> <!-- Only show div if img exists -->
+                          <img :src="member.img" height="150" style="object-fit: cover;" alt="">
                         </div>
                         <template v-slot:activator="{ props }">
-                          <v-chip   color="" v-bind="props"  size="small"> {{ member.menuName }}</v-chip>
+                          <span v-bind="props"> <!-- Wrap v-chip in a span -->
+                            <v-chip   color="" size="small"> {{ member.menuName }}</v-chip>
+                          </span>
                         </template>
                       </v-tooltip>
                     </div>
@@ -55,6 +58,8 @@
                 </div>
               </v-card-text>
               <v-divider class="mx-4 mb-1"></v-divider>
+              <!-- Commented out v-card-actions -->
+              <!--
               <v-card-actions class="px-4 pb-4 pt-3">
                 <v-btn  prepend-icon="mdi-cart" class=" px-3"  color="#DF2C00" variant="flat" @click="AddCombo(item)">
                   order
@@ -62,6 +67,7 @@
                 <v-spacer></v-spacer>
                 <h3 class="text-h4"> &#8369;{{Number(item.price).toLocaleString()}}</h3>
               </v-card-actions>
+              -->
             </v-card>
           </v-col>
 
@@ -92,9 +98,14 @@ function downloadImage(url, name) {
 import { ref, getCurrentInstance, onMounted, inject, computed } from 'vue'
 import { db, storage } from '@/firebase'
 import { ref as refS, getDownloadURL } from "firebase/storage";
+import { useCartStore } from '@/stores/cart'; // Import the Pinia store
+
 const emitter = inject('emitter');
 const internalInstance = getCurrentInstance()
-const img = ref(null);
+const cartStore = useCartStore(); // Initialize the store
+const loading = ref(false); // Add this line
+// ... other refs and props
+
 const props = defineProps({
     data: {
         type: Object,
@@ -103,15 +114,17 @@ const props = defineProps({
 })
 
 const comboList = computed(() => {
-  if (!props.data) return [];
-  return Array.isArray(props.data) ? props.data : Object.values(props.data);
+  if (!props.data) {
+    return [];
+  }
+  const result = Array.isArray(props.data) ? props.data : Object.values(props.data);
+  return result;
 });
 
 
 function AddCombo(val) {
-    // const x = internalInstance.appContext.config.globalProperties.gVar.combo[val.name] = val
-    // var Count  = Object.keys(x.members).length;
-    internalInstance.appContext.config.globalProperties.gVar.combo[val.name] = val
+    // Use cartStore.combo instead of gVar.combo
+    cartStore.combo[val.name] = val;
     emitter.emit('add-combo', val);
     emitter.emit('add-per-menu', 1);
 }

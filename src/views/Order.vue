@@ -12,7 +12,7 @@
             </v-card-title>
         </v-img>
     </v-container>
-    <v-container :key="updateKey" class="mt-0 pt-0">
+    <v-container class="mt-0 pt-0">
         <!-- Floating Menu Button -->
         <v-btn
             class="floating-menu-btn"
@@ -43,7 +43,7 @@
                         <div>
                             <v-btn @click="dialog = true" density="comfortable" variant="flat" size="small" class="mr-2"
                                 icon="mdi-plus"></v-btn>
-                            <v-btn @click="emitter.emit('remove', Object.keys(combo).length); combo = {}; gVar.combo = {}"
+                            <v-btn @click="emitter.emit('remove', Object.keys(combo).length); combo = {}; cartStore.combo = {}"
                                 density="comfortable" variant="flat" size="small" icon="mdi-delete-empty"></v-btn>
                         </div>
                     </div>
@@ -55,7 +55,7 @@
                             </v-checkbox> -->
                                 <div class="font-weight-bold text-grey mt-4 my-2">{{ item.desc }}
                                     <v-chip size="small" color="amber">
-                                        &#8369;{{ (Object.values(item.members).reduce((s, a) => s + parseFloat(a.menuPrice),
+&#8369;{{ (Object.values(item.members).reduce((s, a) => s + (isNaN(parseFloat(a.menuPrice)) ? 0 : parseFloat(a.menuPrice)),
                                             0) - item.disc).toLocaleString() }}
                                     </v-chip>
                                 </div>
@@ -77,14 +77,14 @@
                         <v-spacer></v-spacer>
                         <v-btn @click="OpenMenu(); menudialog = true" variant="flat" class="mr-2" size="small"
                             density="comfortable" icon> <v-icon>mdi-plus</v-icon> </v-btn>
-                        <v-btn @click="emitter.emit('remove', Object.keys(items).length); items = {}; gVar.items = {}"
+                        <v-btn @click="emitter.emit('remove', Object.keys(items).length); items = {}; cartStore.items = {}"
                             variant="flat" size="small" density="comfortable" icon> <v-icon>mdi-delete-empty</v-icon>
                         </v-btn>
                     </div>
                     <!-- <v-checkbox @click="selectAll" v-model="allSelected">Select all</v-checkbox> -->
                     <TransitionGroup name="list" tag="ul">
-                        <div v-for="item in items">
-                            <Item :data="item" />
+                        <div v-for="item in items" :key="item.menuCode">
+<Item :data="item" @update-selected-size="updateItemSize" :key="item.menuCode" />
                         </div>
                     </TransitionGroup>
                 </v-responsive>
@@ -290,11 +290,11 @@
                                     <v-spacer></v-spacer>
                                     <div class="d-flex justify-end" style="min-width: 100px;">
                                         <span>&#8369;</span>{{ Number(item.menuPrice).toLocaleString('en-US') }}
-                                        <v-btn
-                                            @click="items[item.menuCode] = item; menudialog = false; emitter.emit('add-per-menu', 1)"
-                                            size="small" class="ml-4" density="comfortable" icon>
-                                            <v-icon>mdi-cart</v-icon>
-                                        </v-btn>
+<v-btn
+    @click="addItemWithDefaultSize(item)"
+    size="small" class="ml-4" density="comfortable" icon>
+    <v-icon>mdi-cart</v-icon>
+</v-btn>
                                     </div>
                                 </div>
                             </v-col>
@@ -313,18 +313,50 @@ import Combo from '@/components/Combo.vue'
 import { db, storage } from '@/firebase'
 
 import { useRouter } from 'vue-router'
+import { useCartStore } from '@/stores/cart'; // Import the Pinia store
+import { storeToRefs } from 'pinia';
+
 const router = useRouter()
 
 
 const internalInstance = getCurrentInstance()
 const emitter = inject('emitter');
-const combo = ref({})
-const items = ref({})
-const itemsCount = ref(0)
+
+const cartStore = useCartStore(); // Initialize the store
+
+// Replace local refs with store state
+const { combo, items } = storeToRefs(cartStore);
+
+const itemSizes = ref({}) // Track selected size per item
 const df = ref(0);
-const disc = ref(0);
-const permenusub = ref(0)
-const combosub = ref(0)
+
+const itemsCount = computed(() => {
+  return Object.values(items.value).reduce((sum, item) => sum + Number(item.buyQty), 0);
+});
+
+const permenusub = computed(() => {
+  return Object.values(items.value).reduce((sum, item) => {
+    const price = getItemPrice(item);
+    const qty = Number(item.buyQty);
+    return sum + (price * qty);
+  }, 0);
+});
+
+const combosub = computed(() => {
+  return Object.values(combo.value).reduce((sum, comboItem) => {
+    return sum + Object.values(comboItem.members).reduce((memberSum, member) => {
+      const price = getItemPrice(member);
+      const qty = Number(member.buyQty);
+      return memberSum + (price * qty);
+    }, 0);
+  }, 0);
+});
+
+const disc = computed(() => {
+  return Object.values(combo.value).reduce((sum, comboItem) => sum + Number(comboItem.disc), 0);
+});
+
+
 const dialog = ref(false)
 const changedialog = ref(false)
 const selectedchange = ref(null)
@@ -332,7 +364,7 @@ const menudialog = ref(false)
 const data = ref(null)
 const menuData = ref(null)
 const changeMenuData = ref({})
-const updateKey = ref(0)
+
 const tab = ref(null)
 const itemsArray = ref([])
 
@@ -340,23 +372,27 @@ const itemsArray = ref([])
 // const selected = ref([])
 // const allSelected = ref(false);
 
-const computedtotal = computed(() => {
-    const keyup = updateKey.value
-    permenusub.value = Object.values(items.value).reduce((s, a) => s + parseFloat(a.menuPrice), 0);
-    itemsCount.value = Object.values(items.value).reduce((s, a) => s + parseFloat(a.buyQty), 0);
-
-    combosub.value = 0
-    disc.value = 0
-
-    for (const x in combo.value) {
-        disc.value += parseFloat(combo.value[x].disc)
-        combosub.value += Object.values(combo.value[x].members).reduce((s, a) => s + parseFloat(a.menuPrice), 0);
+function getItemPrice(item) {
+  // If menuPrice is an object with size-specific prices
+  if (typeof item.menuPrice === 'object' && item.menuPrice !== null) {
+    if (item.selectedSize && item.menuPrice[item.selectedSize]) {
+      return Number(item.menuPrice[item.selectedSize]);
     }
-    return combosub.value + permenusub.value
-})
-// watch(items, (a) =>{
-// console.log("New value",a)
-// })
+    // Fallback to 'medium' if selectedSize is not found or not set
+    if (item.menuPrice.medium) {
+      return Number(item.menuPrice.medium);
+    }
+    return 0; // Default to 0 if no valid price found in object
+  }
+  // If menuPrice is a single numeric price
+  return Number(item.menuPrice);
+}
+
+const computedtotal = computed(() => {
+    return combosub.value + permenusub.value;
+});
+
+
 
 // function selectAll() {
 //     selecteditems.value = []
@@ -370,8 +406,8 @@ const computedtotal = computed(() => {
 // }
 
 onMounted(() => {
-    combo.value = internalInstance.appContext.config.globalProperties.gVar.combo
-    items.value = internalInstance.appContext.config.globalProperties.gVar.items
+    // combo.value = internalInstance.appContext.config.globalProperties.gVar.combo
+    // items.value = internalInstance.appContext.config.globalProperties.gVar.items
     const que = query(fireRef(db, 'Combo'));
     const q = query(fireRef(db, 'MenuCategory'));
     console.log('COMBO', combo.value)
@@ -392,16 +428,40 @@ onMounted(() => {
         console.log('COMBO', combo.value)
         updateKey.value += 1
     });
-    emitter.on('add-qty', (val) => {   // *Listen* for event
-        console.log(val.buyQty)
-        const i = parseFloat(val.menuPrice) / parseFloat(val.buyQty)
-        val['buyQty'] = parseFloat(val['buyQty']) + 1
-        val['menuPrice'] = parseFloat(val.menuPrice) + i
+    emitter.on('add-qty', (val) => {
+        if (val.menuCode && items.value[val.menuCode]) {
+            // Ensure buyQty is a number and increment
+            items.value[val.menuCode].buyQty = Number(items.value[val.menuCode].buyQty) + 1;
+            // Store the selectedSize from the emitted value
+            items.value[val.menuCode].selectedSize = val.selectedSize;
+        } else if (val.name && combo.value[val.name]) {
+            const comboItem = combo.value[val.name];
+            for (const key in comboItem.members) {
+                if (comboItem.members[key].menuCode === val.menuCode) {
+                    comboItem.members[key].buyQty = Number(comboItem.members[key].buyQty) + 1;
+                    // Store selectedSize for combo members too if applicable
+                    comboItem.members[key].selectedSize = val.selectedSize;
+                    break;
+                }
+            }
+        }
+        updateKey.value += 1; // Trigger UI update
     });
-    emitter.on('remove-qty', (val) => {   // *Listen* for event
-        const i = parseFloat(val.menuPrice) / parseFloat(val.buyQty)
-        val['buyQty'] -= 1
-        val['menuPrice'] = parseFloat(val.menuPrice) - i
+    emitter.on('remove-qty', (val) => {
+        if (val.menuCode && items.value[val.menuCode]) {
+            items.value[val.menuCode].buyQty = Math.max(1, Number(items.value[val.menuCode].buyQty) - 1);
+            items.value[val.menuCode].selectedSize = val.selectedSize;
+        } else if (val.name && combo.value[val.name]) {
+            const comboItem = combo.value[val.name];
+            for (const key in comboItem.members) {
+                if (comboItem.members[key].menuCode === val.menuCode) {
+                    comboItem.members[key].buyQty = Math.max(1, Number(comboItem.members[key].buyQty) - 1);
+                    comboItem.members[key].selectedSize = val.selectedSize;
+                    break;
+                }
+            }
+        }
+        updateKey.value += 1; // Trigger UI update
     });
     emitter.on('change-menu', (val) => {   // *Listen* for event
         changedialog.value = true
@@ -428,6 +488,34 @@ onMounted(() => {
     // });
     window.scrollTo(0,0);
 })
+
+function addItemWithDefaultSize(item) {
+    // Clone item to avoid direct mutation of original data
+    const newItem = { ...item };
+    // Ensure buyQty is initialized as a number
+    newItem.buyQty = Number(newItem.buyQty || 1); // Default to 1 if not present
+
+    // If menuPrice is an object (meaning it has size options)
+    if (typeof newItem.menuPrice === 'object' && newItem.menuPrice !== null) {
+        // Set default selectedSize to 'medium' if available, otherwise to the first key
+        if (newItem.menuPrice.medium) {
+            newItem.selectedSize = 'medium';
+        } else if (Object.keys(newItem.menuPrice).length > 0) {
+            newItem.selectedSize = Object.keys(newItem.menuPrice)[0];
+        } else {
+            newItem.selectedSize = null; // No sizes available
+        }
+    } else {
+        // If menuPrice is a single value, no selectedSize is needed
+        newItem.selectedSize = null;
+    }
+
+    // Add the item to the reactive items object
+    items.value[newItem.menuCode] = newItem;
+
+    menudialog.value = false;
+    emitter.emit('add-per-menu', 1); // This event seems to be for updating a count, not directly related to item addition
+}
 function OpenMenu() {
     const que = query(fireRef(db, 'MenuCategory'));
 
@@ -436,35 +524,52 @@ function OpenMenu() {
     })
 }
 function Checkout() {
-    itemsArray.value = []
-    for (const a in combo.value) {
-        for (const b in combo.value[a].members) {
-            itemsArray.value.push(combo.value[a].members[b])
+    const finalItems = [];
+
+    // Process combo items
+    for (const comboName in combo.value) {
+        const comboItem = combo.value[comboName];
+        for (const memberKey in comboItem.members) {
+            const member = { ...comboItem.members[memberKey] }; // Clone to avoid direct mutation
+            member.calculatedPrice = getItemPrice(member); // Get the price for the selected size
+            finalItems.push(member);
         }
     }
-    for (const a in items.value) {
-        itemsArray.value.push(items.value[a])
+
+    // Process individual menu items
+    for (const menuCode in items.value) {
+        const item = { ...items.value[menuCode] }; // Clone
+        item.calculatedPrice = getItemPrice(item); // Get the price for the selected size
+        finalItems.push(item);
     }
 
-    var output =  itemsArray.value.reduce(function (accumulator, cur) {
-        var name = cur.menuName, found = accumulator.find(function (elem) {
-            return elem.menuName == name
-        });
-        if (found) found.buyQty += cur.buyQty;
-        else accumulator.push(cur);
+    // Aggregate items by menuName and sum buyQty
+    const aggregatedItems = finalItems.reduce((accumulator, currentItem) => {
+        const existingItem = accumulator.find(elem => elem.menuName === currentItem.menuName);
+        if (existingItem) {
+            existingItem.buyQty = Number(existingItem.buyQty) + Number(currentItem.buyQty);
+            // If prices differ for aggregated items, you might need a more complex average or sum
+            // For now, assuming calculatedPrice is consistent for same menuName or taking the last one
+            // If you need to sum prices, you'd need to store original price * qty
+            // For simplicity, we'll just use the calculatedPrice of the found item.
+        } else {
+            accumulator.push({ ...currentItem }); // Push a clone to avoid modifying original
+        }
         return accumulator;
     }, []);
 
-    itemsArray.value = output
-
-    internalInstance.appContext.config.globalProperties.gVar.orders['combosub'] = combosub.value
-    internalInstance.appContext.config.globalProperties.gVar.orders['permenusub'] = permenusub.value
-    internalInstance.appContext.config.globalProperties.gVar.orders['total'] = computedtotal.value
-    internalInstance.appContext.config.globalProperties.gVar.orders['disctotal'] = disc.value
-    internalInstance.appContext.config.globalProperties.gVar.orders['items'] = itemsArray.value
-    // console.log(obj)
+    cartStore.orders.combosub = combosub.value;
+    cartStore.orders.permenusub = permenusub.value;
+    cartStore.orders.total = computedtotal.value;
+    cartStore.orders.disctotal = disc.value;
+    cartStore.orders.items = aggregatedItems; // Use aggregatedItems
 }
 
+function updateItemSize({ menuCode, selectedSize }) {
+  if (cartStore.items[menuCode]) {
+    cartStore.items[menuCode].selectedSize = selectedSize;
+  }
+}
 
 </script>
 <style lang="scss" scoped>

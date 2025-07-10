@@ -88,7 +88,7 @@
 
                 <v-responsive style="background-color: #0E0E10;" class="px-5 py-4 my-4">
                     <h3 class="text-h8 font-weight-bold mb-4">
-                        ORDERED ITEMS ({{ gVar.orders.items.length }})
+                        ORDERED ITEMS ({{ cartStore.orders.items.length }})
                     </h3>
                     <v-table density="comfortable" style="background-color: #0E0E10;">
                         <thead >
@@ -105,7 +105,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="item,  i in gVar.orders.items">
+                            <tr v-for="item,  i in cartStore.orders.items">
                                 <td  style="width: 15px;">{{ i+1 }}</td>
                                 <td class="pl-0">
                                     <div class="d-flex align-center ">
@@ -191,12 +191,12 @@
                         <tbody>
                             <tr>
                                 <td class="text-grey text-body-2 py-1">Subtotal</td>
-                                <td class="text-right text-body-2 py-1"><span>&#8369;</span> {{ gVar.orders.total.toLocaleString('en-US')  }}</td>
+                                <td class="text-right text-body-2 py-1"><span>&#8369;</span> {{ cartStore.orders.total.toLocaleString('en-US')  }}</td>
                                 
                             </tr>
                             <tr>
                                 <td class="text-grey text-body-2 py-1">Discount</td>
-                                <td class="text-right text-body-2 py-1"><span>&#8369;</span> {{ gVar.orders.disctotal.toLocaleString('en-US')  }}</td>
+                                <td class="text-right text-body-2 py-1"><span>&#8369;</span> {{ cartStore.orders.disctotal.toLocaleString('en-US')  }}</td>
                             </tr>
                             <tr>
                                 <td class="text-grey text-body-2 py-1">Delivery fee</td>
@@ -209,7 +209,7 @@
                     <table class="w-100">
                         <tr>
                             <td class="text-grey text-body-2 text-uppercase">Amount to pay</td>
-                            <td class="text-right text-h5 text-orange-accent-4"><span>&#8369;</span> {{ (gVar.orders.total - gVar.orders.disctotal).toLocaleString('en-US')  }}</td>
+                            <td class="text-right text-h5 text-orange-accent-4"><span>&#8369;</span> {{ (cartStore.orders.total - cartStore.orders.disctotal).toLocaleString('en-US')  }}</td>
                         </tr>
                     </table>
                     
@@ -259,11 +259,11 @@
                 𝑵𝒂𝒎𝒆: {{ data.name }}<br>
                 𝑪𝒐𝒏𝒕𝒂𝒄𝒕#: {{ data.contact }}<br>
                 𝑶𝒓𝒅𝒆𝒓: <br>
-                <span  v-for="item,  i in gVar.orders.items">
+                <span  v-for="item,  i in cartStore.orders.items">
                    - {{ item.menuName }}<br>
                 </span>
                 Delivery Fee: (unknown)<br>
-                Total: {{ (gVar.orders.total - gVar.orders.disctotal).toLocaleString('en-US')  }}<br>
+                Total: {{ (cartStore.orders.total - cartStore.orders.disctotal).toLocaleString('en-US')  }}<br>
                 𝑳𝒐𝒄𝒂𝒕𝒊𝒐𝒏,,𝒍𝒂𝒏𝒅𝒎𝒂𝒓𝒌: {{ data.address }}
             </span>
         </v-col>
@@ -320,9 +320,11 @@ import { ref,getCurrentInstance, onMounted } from 'vue'
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css'
 import moment from 'moment'
+import { useCartStore } from '@/stores/cart'; // Import the Pinia store
 
-const internalInstance = getCurrentInstance()
-const date = ref(null)
+const cartStore = useCartStore(); // Initialize the store
+
+// ... rest of the script setup
 const time = ref(null)
 const myForm = ref();
 const dateError = ref(false);
