@@ -55,18 +55,17 @@
                             </v-checkbox> -->
                                 <div class="font-weight-bold text-grey mt-4 my-2">{{ item.desc }}
                                     <v-chip size="small" color="amber">
-&#8369;{{ (Object.values(item.members).reduce((s, a) => s + (isNaN(parseFloat(a.menuPrice)) ? 0 : parseFloat(a.menuPrice)),
-                                            0) - item.disc).toLocaleString() }}
+&#8369;{{ (Object.values(item.members).reduce((s, a) => s + getItemPrice(a), 0) - item.disc).toLocaleString() }}
                                     </v-chip>
                                 </div>
                                 <div class="text-body-2 text-green-accent-4"> Less &#8369;{{
-                                    item.disc.toLocaleString("En") }}
+                                    item.disc.toLocaleString('en-US') }}
                                 </div>
                                 <v-btn @click="emitter.emit('remove', 1); delete combo[item.name]" density="comfortable"
                                     variant="text" size="small" icon="mdi-delete-empty"></v-btn>
                             </div>
                             <div v-for="menuitem, selectedkey in item.members" :key="menuitem.menuCode">
-                                <Item :data="menuitem" :isCombo="true" :selectedCombo=item :selectedkey=selectedkey />
+                                <Item :data="menuitem" :isCombo="true" :selectedCombo=item :selectedkey="String(selectedkey)" />
                             </div>
                         </div>
                     </TransitionGroup>
@@ -201,7 +200,7 @@
                             <div class="d-flex justify-end align-center" style="min-width: 90px;">
                                 <span>&#8369;</span>{{ Number(item.menuPrice).toLocaleString('en-US') }}
                                 <v-btn color=""
-                                    @click="changedialog = false; combo[selectedchange.combo].members[selectedchange.selectedkey] = item"
+                                    @click="replaceComboItem(item)"
                                     class="ml-2" size="small" density="comfortable" icon>
                                     <v-icon>mdi-cached</v-icon>
                                 </v-btn>
@@ -332,13 +331,15 @@ const cartStore = useCartStore(); // Initialize the store
 const { combo, items } = storeToRefs(cartStore);
 
 const df = ref(0);
+const updateKey = ref(0);
 
 const itemsCount = computed(() => {
   return Object.keys(items.value).length;
 });
 
 const permenusub = computed(() => {
-  return Object.values(items.value).reduce((sum, item) => {
+  const a = updateKey.value; // Depend on updateKey
+  const subtotal = Object.values(items.value).reduce((sum, item) => {
     const price = getItemPrice(item);
     const qty = Number(item.buyQty);
     if (isNaN(price) || isNaN(qty)) {
@@ -346,10 +347,12 @@ const permenusub = computed(() => {
     }
     return sum + (price * qty);
   }, 0);
+  return subtotal;
 });
 
 const combosub = computed(() => {
-  return Object.values(combo.value).reduce((sum, comboItem) => {
+  const a = updateKey.value; // Depend on updateKey
+  const subtotal = Object.values(combo.value).reduce((sum, comboItem) => {
     const comboMembersSubtotal = Object.values(comboItem.members).reduce((memberSum, member) => {
       const price = getItemPrice(member);
       const qty = Number(member.buyQty);
@@ -360,6 +363,7 @@ const combosub = computed(() => {
     }, 0);
     return sum + comboMembersSubtotal;
   }, 0);
+  return subtotal;
 });
 
 const disc = computed(() => {
@@ -386,23 +390,40 @@ const itemsArray = ref([])
 // const allSelected = ref(false);
 
 function getItemPrice(item) {
+  const parsePrice = (price) => {
+    if (typeof price === 'string') {
+      // Remove currency symbols and commas, then parse
+      const numericString = price.replace(/[^\d.-]/g, '');
+      return parseFloat(numericString) || 0;
+    }
+    return Number(price) || 0;
+  };
+
   // If menuPrice is an object with size-specific prices
   if (typeof item.menuPrice === 'object' && item.menuPrice !== null) {
+    let price = 0;
     if (item.selectedSize && item.menuPrice[item.selectedSize]) {
-      return Number(item.menuPrice[item.selectedSize]);
+      price = item.menuPrice[item.selectedSize];
+    } else if (item.menuPrice.medium) {
+      price = item.menuPrice.medium; // Fallback to medium
     }
-    // Fallback to 'medium' if selectedSize is not found or not set
-    if (item.menuPrice.medium) {
-      return Number(item.menuPrice.medium);
-    }
-    return 0; // Default to 0 if no valid price found in object
+    return parsePrice(price);
   }
-  // If menuPrice is a single numeric price
-  return Number(item.menuPrice);
+
+  // If menuPrice is a single numeric or string price
+  return parsePrice(item.menuPrice);
 }
 
 const computedtotal = computed(() => {
-    return combosub.value + permenusub.value;
+  // Depend on updateKey to force re-computation
+  const a = updateKey.value;
+
+  const comboVal = Number(combosub.value) || 0;
+  const permenuVal = Number(permenusub.value) || 0;
+  const dfVal = Number(df.value) || 0;
+  const discVal = Number(disc.value) || 0;
+  const total = comboVal + permenuVal + dfVal - discVal;
+  return total;
 });
 
 
@@ -431,8 +452,14 @@ onMounted(() => {
         emitter.on('remove-item', (val) => {   // *Listen* for event
         delete items.value[val]
     });
-    emitter.on('add-combo', (val) => {   // *Listen* for event
+        emitter.on('add-combo', (val) => {   // *Listen* for event
         dialog.value = false;
+        // Ensure buyQty is a number for each member of the combo
+        if (val.members) {
+            Object.values(val.members).forEach(member => {
+                member.buyQty = Number(member.buyQty) || 1;
+            });
+        }
         combo.value[val.name] = val;
     });
     emitter.on('change-menu', (val) => {   // *Listen* for event
@@ -463,14 +490,14 @@ onMounted(() => {
 function addItemWithDefaultSize(item) {
     // Ensure item is an object before proceeding
     if (typeof item !== 'object' || item === null || !item.menuCode) {
-        console.warn('DEBUG: addItemWithDefaultSize - Invalid item received, skipping:', item);
+        
         return;
     }
 
     // Clone item to avoid direct mutation of original data
     const newItem = { ...item };
     // Ensure buyQty is initialized as a number
-    newItem.buyQty = Number(newItem.buyQty || 1); // Default to 1 if not present
+    newItem.buyQty = Number(newItem.buyQty) || 1; // Default to 1 if not present or NaN
 
     // If menuPrice is an object (meaning it has size options)
     if (typeof newItem.menuPrice === 'object' && newItem.menuPrice !== null) {
@@ -542,11 +569,33 @@ function Checkout() {
     cartStore.orders.items = aggregatedItems; // Use aggregatedItems
 }
 
+function replaceComboItem(newItem) {
+    if (selectedchange.value && selectedchange.value.combo && selectedchange.value.selectedkey) {
+        const { combo: comboName, selectedkey } = selectedchange.value;
+        if (combo.value[comboName] && combo.value[comboName].members[selectedkey]) {
+            const updatedItem = { ...newItem, buyQty: 1 }; // Set buyQty to 1
+            combo.value[comboName].members[selectedkey] = updatedItem;
+            updateKey.value++;
+        }
+    }
+    changedialog.value = false;
+}
+
 function updateItemSize({ menuCode, selectedSize }) {
   if (cartStore.items[menuCode]) {
     cartStore.items[menuCode].selectedSize = selectedSize;
+    updateKey.value++; // Force computed properties to update
   }
 }
+
+// Watch for changes in items and combo to update the total
+watch(items, (newItems, oldItems) => {
+  updateKey.value++;
+}, { deep: true });
+
+watch(combo, (newCombo, oldCombo) => {
+  updateKey.value++;
+}, { deep: true });
 
 </script>
 <style lang="scss" scoped>

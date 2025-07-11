@@ -63,7 +63,7 @@
                   order
                 </v-btn>
                 <v-spacer></v-spacer>
-                <h3 class="text-h4"> &#8369;{{Number(getComboPrice(item)).toLocaleString()}}</h3>
+                <h3 class="text-h4"> &#8369;{{Number(getComboPrice(item) - item.disc).toLocaleString()}}</h3>
               </v-card-actions>
             </v-card>
           </v-col>
@@ -131,17 +131,15 @@ function getComboPrice(combo) {
       price = Number(member.menuPrice);
     }
     return sum + price;
-  }, 0) - Number(combo.disc || 0);
+  }, 0);
 }
 
 function AddCombo(combo) {
-    // Create a deep copy to avoid mutating the original prop
-    const comboToAdd = JSON.parse(JSON.stringify(combo));
-
     // Ensure all members have default properties for calculation
-    if (comboToAdd.members && typeof comboToAdd.members === 'object') {
-        Object.values(comboToAdd.members).forEach(member => {
-            member.buyQty = 1; // Default quantity
+    if (combo.members) {
+        Object.keys(combo.members).forEach(key => {
+            const member = combo.members[key];
+            member.buyQty = Number(member.buyQty) || 1; // Ensure buyQty is a number, default to 1
             if (typeof member.menuPrice === 'object' && member.menuPrice !== null) {
                 member.selectedSize = member.menuPrice.medium ? 'medium' : Object.keys(member.menuPrice)[0];
             } else {
@@ -149,10 +147,9 @@ function AddCombo(combo) {
             }
         });
     }
-    comboToAdd.disc = Number(comboToAdd.disc || 0); // Ensure discount is a number
-    cartStore.combo[comboToAdd.name] = comboToAdd;
-    emitter.emit('add-combo', comboToAdd); // Emit the processed combo
-    
+    combo.disc = Number(combo.disc || 0); // Ensure discount is a number
+    cartStore.combo[combo.name] = combo;
+    emitter.emit('add-combo', combo); // Emit the processed combo
 }
 </script>
 <style lang="scss">
