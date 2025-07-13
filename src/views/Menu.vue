@@ -105,7 +105,7 @@
     ({{ itemSizes[item.menuCode] === 'medium' ? 'Medium' : 'Large' }})
   </span>
 </h5>
-                    <div class="d-flex align-center mt-1" v-if="item.menuPrice && typeof item.menuPrice === 'object'">
+                    <div class="d-flex align-center mt-1" v-if="item.menuPrices && typeof item.menuPrices === 'object'">
                       <v-menu offset-y>
                         <template v-slot:activator="{ props }">
                           <v-btn v-bind="props" density="compact" size="small">
@@ -288,19 +288,19 @@ const emitter = inject("emitter");
 const smoothScroll = inject("smoothScroll");
 
 function getCurrentPrice(item) {
-  if (!item || !item.menuPrice) {
-    return 0; // Return 0 if item or menuPrice is missing
+  if (!item || !item.menuPrices) {
+    return 0; // Return 0 if item or menuPrices is missing
   }
 
-  // Case 1: menuPrice is an object with size-specific prices
-  if (typeof item.menuPrice === 'object' && item.menuPrice !== null) {
+  // Case 1: menuPrices is an object with size-specific prices
+  if (typeof item.menuPrices === 'object' && item.menuPrices !== null) {
     const selectedSize = itemSizes[item.menuCode] || 'medium'; // Default to medium
-    return Number(item.menuPrice[selectedSize] || item.menuPrice.medium || 0);
+    return Number(item.menuPrices[selectedSize] || item.menuPrices.medium || 0);
   }
 
-  // Case 2: menuPrice is a single numeric value
-  if (!isNaN(item.menuPrice)) {
-    return Number(item.menuPrice);
+  // Case 2: menuPrices is a single numeric value
+  if (!isNaN(item.menuPrices)) {
+    return Number(item.menuPrices);
   }
 
   return 0; // Default case

@@ -43,18 +43,28 @@
             <span>&#8369;</span> {{ Number(currentPrice).toLocaleString() }}
           </div>
         </v-col>
-        <v-col cols="4" class="pa-0 d-flex align-center justify-center">
-          <v-select
-            v-model="selectedSize"
-            :items="data.menuPrice ? Object.keys(data.menuPrice) : []"
-            density="compact"
-            hide-details
-            variant="outlined"
-            style="max-width: 120px;"
-            class="v-select-custom-align"
-            :key="props.data.menuCode"
-          ></v-select>
-        </v-col>
+          <v-col cols="4" class="pa-0 d-flex align-center justify-center" v-if="data.menuName.toLowerCase() !== 'manfo crepe'">
+              <v-btn-toggle
+                v-model="selectedSize"
+                mandatory
+                class="v-select-custom-align"
+                style="max-width: 120px; padding: 2px;"
+                density="compact"
+                variant="outlined"
+                :key="props.data.menuCode"
+              >
+                <v-btn
+                  v-for="size in data.menuPrices ? Object.keys(data.menuPrices) : []"
+                  :key="size"
+                  :value="size"
+                  class="text-capitalize"
+                  density="compact"
+                  style="min-width: 40px; padding: 2px;"
+                >
+                  {{ size === 'medium' ? 'M' : size === 'large' ? 'L' : size }}
+                </v-btn>
+              </v-btn-toggle>
+          </v-col>
         <v-col cols="4" class="pa-0" v-if="!isCombo">
           <div class="d-flex justify-end">
             <v-btn
@@ -95,22 +105,34 @@ const selected = ref([]);
 const selectedSize = ref('medium'); // Reintroduce local ref
 
 const currentPrice = computed(() => {
-  // If menuPrice is an object with size-specific prices
-  if (typeof props.data.menuPrice === 'object' && props.data.menuPrice !== null) {
-    if (props.data.menuPrice[selectedSize.value]) {
-      const price = Number(props.data.menuPrice[selectedSize.value]);
-      return price;
+  // If menuPrices is an object with size-specific prices
+  if (typeof props.data.menuPrices === 'object' && props.data.menuPrices !== null) {
+    if (props.data.menuPrices[selectedSize.value]) {
+      const price = Number(props.data.menuPrices[selectedSize.value]);
+      if (!isNaN(price) && price > 0) {
+        return price;
+      }
     }
     // If props.data.selectedSize doesn't match a key in the object,
     // try to return the price of 'medium' if available, otherwise 0.
-    if (props.data.menuPrice.medium) {
-      const price = Number(props.data.menuPrice.medium);
-      return price;
+    if (props.data.menuPrices.medium) {
+      const price = Number(props.data.menuPrices.medium);
+      if (!isNaN(price) && price > 0) {
+        return price;
+      }
     }
-    return 0; // Return 0 if no matching size and no 'medium' fallback
+    // If medium price is missing or zero, try first available price > 0
+    const keys = Object.keys(props.data.menuPrices);
+    for (const key of keys) {
+      const price = Number(props.data.menuPrices[key]);
+      if (!isNaN(price) && price > 0) {
+        return price;
+      }
+    }
+    return 0; // Return 0 if no valid price found
   }
-  // If menuPrice is a single numeric price (not an object)
-  const price = Number(props.data.menuPrice);
+  // If menuPrices is a single numeric price (not an object)
+  const price = Number(props.data.menuPrices);
   return price;
 });
 
@@ -141,8 +163,8 @@ onMounted(() => {
   // Initialize from prop if it exists, otherwise set a default.
   if (props.data.selectedSize) {
     selectedSize.value = props.data.selectedSize;
-  } else if (props.data.menuPrice && typeof props.data.menuPrice === 'object') {
-    selectedSize.value = props.data.menuPrice.medium ? 'medium' : Object.keys(props.data.menuPrice)[0];
+  } else if (props.data.menuPrices && typeof props.data.menuPrices === 'object') {
+    selectedSize.value = props.data.menuPrices.medium ? 'medium' : Object.keys(props.data.menuPrices)[0];
   }
 });
 
@@ -180,6 +202,6 @@ table {
 }
 
 .v-select-custom-align {
-  margin-top: -8px;
+  margin-top: 0;
 }
 </style>

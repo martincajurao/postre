@@ -1,4 +1,4 @@
-<template>
+ <template>
     <v-container class="pb-0">
         <v-img src="" class="align-end text-white py-0" height="150" cover>
             <v-card-title class="text-body-1">
@@ -123,7 +123,7 @@
                                             <!-- Download button removed as per request -->
                                         </div>
                                         <div class=" ml-3 ">
-                                            <h4 class="text-grey">{{ item.menuName }}</h4>
+                                            <h4 class="text-grey">{{ item.menuName }} <small v-if="item.selectedSize">({{ item.selectedSize }})</small></h4>
                                             <div class="text-grey text-caption py-"> Fried Spare Ribs</div>
                                         </div>
                                     </div>
@@ -191,7 +191,7 @@
                         <tbody>
                             <tr>
                                 <td class="text-grey text-body-2 py-1">Subtotal</td>
-                                <td class="text-right text-body-2 py-1"><span>&#8369;</span> {{ cartStore.orders.total.toLocaleString('en-US')  }}</td>
+                                <td class="text-right text-body-2 py-1"><span>&#8369;</span> {{ subtotal.toLocaleString('en-US') }}</td>
                                 
                             </tr>
                             <tr>
@@ -209,7 +209,7 @@
                     <table class="w-100">
                         <tr>
                             <td class="text-grey text-body-2 text-uppercase">Amount to pay</td>
-                            <td class="text-right text-h5 text-orange-accent-4"><span>&#8369;</span> {{ (cartStore.orders.total - cartStore.orders.disctotal).toLocaleString('en-US')  }}</td>
+                            <td class="text-right text-h5 text-orange-accent-4"><span>&#8369;</span> {{ (cartStore.orders.total ).toLocaleString('en-US')  }}</td>
                         </tr>
                     </table>
                     
@@ -300,6 +300,12 @@
     
 </template>
 <script setup>
+import { ref, getCurrentInstance, onMounted, computed } from 'vue';
+import VueDatePicker from '@vuepic/vue-datepicker';
+import '@vuepic/vue-datepicker/dist/main.css';
+import moment from 'moment';
+import { useCartStore } from '@/stores/cart'; // Import the Pinia store
+
 // Download image utility
 function downloadImage(url, name) {
   fetch(url)
@@ -316,68 +322,72 @@ function downloadImage(url, name) {
       }, 100);
     });
 }
-import { ref,getCurrentInstance, onMounted } from 'vue'
-import VueDatePicker from '@vuepic/vue-datepicker';
-import '@vuepic/vue-datepicker/dist/main.css'
-import moment from 'moment'
-import { useCartStore } from '@/stores/cart'; // Import the Pinia store
 
-const cartStore = useCartStore(); // Initialize the store
+// Initialize the store
+const cartStore = useCartStore();
 
-// ... rest of the script setup
-const time = ref(null)
+// Reactive state
+const time = ref(null);
 const myForm = ref();
 const dateError = ref(false);
-const menudialog = ref(false)
+const menudialog = ref(false);
 const data = ref({
-    name: '',
-    contact: '',
-    address: '',
-    inputRules: [
-        value => {
-        if (value) return true
-            return 'Field is required.'
-        },
-        // value => {
-        // if (value?.length >= 2) return true
-        // return 'Minimum is 3 Characters.'
-        // },
-    ]
-    
-})
-onMounted(() => {
-    window.scrollTo(0, 0)
-})
-const submit = () => {
-    myForm.value?.validate().then(({valid: isValid}) => {
-        if (time.value==null || date.value==null ) {
-            dateError.value = true;
-            window.scrollTo(0, 0)
-        }else{
-            menudialog.value = true;
-            dateError.value = false;
-        }
-    })
-  }
-  function copy() {
-        const textx = internalInstance.refs.copytext.innerText;
-        navigator.clipboard.writeText(textx).then(() => {
-        })
-  }
-function format_date(value){
-        if (value) {
-          
-        return moment(String(value)).format('MMM DD, YYYY')
-        }
-}
-function format_time(value){
-    if (value) {
-        let newTime = value.hours + ':' + value.minutes + ':' + value.seconds;
-    return moment(newTime, "HH:mm:ss").format("hh:mm A")
-    }
-}
-// return { form };
+  name: '',
+  contact: '',
+  address: '',
+  inputRules: [
+    value => (value ? true : 'Field is required.'),
+  ],
+});
 
+// Computed properties
+const subtotal = computed(() => {
+  return cartStore.orders.items.reduce((sum, item) => {
+    const price =
+      item.menuPrices && typeof item.menuPrices === 'object' && item.selectedSize
+        ? Number(item.menuPrices[item.selectedSize]) || 0
+        : Number(item.menuPrices) || 0;
+    const qty = Number(item.buyQty) || 0;
+    return sum + price * qty;
+  }, 0);
+});
+
+// Lifecycle hooks
+onMounted(() => {
+  window.scrollTo(0, 0);
+});
+
+// Methods
+const submit = () => {
+  myForm.value?.validate().then(({ valid: isValid }) => {
+    if (time.value == null || date.value == null) {
+      dateError.value = true;
+      window.scrollTo(0, 0);
+    } else {
+      menudialog.value = true;
+      dateError.value = false;
+    }
+  });
+};
+
+const copy = () => {
+  const internalInstance = getCurrentInstance();
+  const textx = internalInstance.refs.copytext.innerText;
+  navigator.clipboard.writeText(textx).then(() => {});
+};
+
+const format_date = (value) => {
+  if (value) {
+    return moment(String(value)).format('MMM DD, YYYY');
+  }
+};
+
+const format_time = (value) => {
+  if (value) {
+    let newTime = value.hours + ':' + value.minutes + ':' + value.seconds;
+    return moment(newTime, 'HH:mm:ss').format('hh:mm A');
+  }
+};
 </script>
 <style lang="scss" scoped>
 .download-btn {

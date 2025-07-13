@@ -63,7 +63,7 @@
                   order
                 </v-btn>
                 <v-spacer></v-spacer>
-                <h3 class="text-h4"> &#8369;{{Number(getComboPrice(item) - item.disc).toLocaleString()}}</h3>
+<h3 class="text-h4"> &#8369;{{Number(Math.max(0, getComboPrice(item) - (item.disc || 0))).toLocaleString()}}</h3>
               </v-card-actions>
             </v-card>
           </v-col>
@@ -111,6 +111,7 @@ const props = defineProps({
 })
 
 const comboList = computed(() => {
+  console.log('Debug comboList data:', props.data);
   if (!props.data) {
     return [];
   }
@@ -123,29 +124,48 @@ function getComboPrice(combo) {
   if (!combo || !combo.members) {
     return 0;
   }
-  return Object.values(combo.members).reduce((sum, member) => {
-    let price = 0;
-    if (typeof member.menuPrice === 'object' && member.menuPrice !== null) {
-      price = Number(member.menuPrice.medium || 0);
-    } else if (!isNaN(member.menuPrice)) {
-      price = Number(member.menuPrice);
+  const parsePrice = (price) => {
+    if (typeof price === 'string') {
+      const numericString = price.replace(/[^0-9.-]+/g, '');
+      const parsed = parseFloat(numericString);
+      return isNaN(parsed) ? 0 : parsed;
     }
-    return sum + price;
+    const num = Number(price);
+    return isNaN(num) ? 0 : num;
+  };
+
+  const sumItemsPrice = Object.values(combo.members).reduce((sum, member) => {
+    if (member.menuPrices && member.menuPrices.medium) {
+      return sum + parsePrice(member.menuPrices.medium);
+    }
+    if (member.menuPrice) {
+      return sum + parsePrice(member.menuPrice);
+    }
+    return sum;
   }, 0);
+
+  // const discount = combo.disc ? parsePrice(combo.disc) : 0;
+  // const totalPrice = sumItemsPrice - discount;
+  // return totalPrice > 0 ? totalPrice : 0;
+  return sumItemsPrice;
 }
 
 function AddCombo(combo) {
-    // Ensure all members have default properties for calculation
+    // Deep clone members to preserve all properties
     if (combo.members) {
+        const newMembers = {};
         Object.keys(combo.members).forEach(key => {
-            const member = combo.members[key];
+            const originalMember = combo.members[key];
+            const member = { ...originalMember }; // shallow clone
             member.buyQty = Number(member.buyQty) || 1; // Ensure buyQty is a number, default to 1
-            if (typeof member.menuPrice === 'object' && member.menuPrice !== null) {
-                member.selectedSize = member.menuPrice.medium ? 'medium' : Object.keys(member.menuPrice)[0];
+            if (typeof member.menuPrices === 'object' && member.menuPrices !== null) {
+                member.selectedSize = member.menuPrices.medium ? 'medium' : Object.keys(member.menuPrices)[0];
             } else {
                 member.selectedSize = null;
             }
+            newMembers[key] = member;
         });
+        combo.members = newMembers;
     }
     combo.disc = Number(combo.disc || 0); // Ensure discount is a number
     cartStore.combo[combo.name] = combo;
