@@ -101,28 +101,28 @@
                     <div class="text-grey-lighten-1 text-caption">{{ item.menuDesc }}</div>
 <h5 class="my-2">
   Php {{ typeof getCurrentPrice(item) === 'number' ? Number(getCurrentPrice(item)).toLocaleString() : '' }}
-  <span v-if="item.menuPrices" class="text-caption ml-2">
+<span v-if="item.menuPrices && showSizeSelector" class="text-caption ml-2">
     ({{ itemSizes[item.menuCode] === 'medium' ? 'Medium' : 'Large' }})
-  </span>
+</span>
 </h5>
-                    <div class="d-flex align-center mt-1" v-if="item.menuPrices && typeof item.menuPrices === 'object'">
-                      <v-menu offset-y>
-                        <template v-slot:activator="{ props }">
-                          <v-btn v-bind="props" density="compact" size="small">
-                            {{ itemSizes[item.menuCode] === 'medium' ? 'Medium' : 'Large' }}
-                            <v-icon right>mdi-chevron-down</v-icon>
-                          </v-btn>
-                        </template>
-                        <v-list>
-                          <v-list-item @click="itemSizes[item.menuCode] = 'medium'">
-                            <v-list-item-title>Medium</v-list-item-title>
-                          </v-list-item>
-                          <v-list-item @click="itemSizes[item.menuCode] = 'large'">
-                            <v-list-item-title>Large</v-list-item-title>
-                          </v-list-item>
-                        </v-list>
-                      </v-menu>
-                    </div>
+<div class="d-flex align-center mt-1" v-if="item.menuPrices && typeof item.menuPrices === 'object' && showSizeSelector">
+  <v-menu offset-y>
+    <template v-slot:activator="{ props }">
+      <v-btn v-bind="props" density="compact" size="small">
+        {{ itemSizes[item.menuCode] === 'medium' ? 'Medium' : 'Large' }}
+        <v-icon right>mdi-chevron-down</v-icon>
+      </v-btn>
+    </template>
+    <v-list>
+      <v-list-item @click="itemSizes[item.menuCode] = 'medium'">
+        <v-list-item-title>Medium</v-list-item-title>
+      </v-list-item>
+      <v-list-item @click="itemSizes[item.menuCode] = 'large'">
+        <v-list-item-title>Large</v-list-item-title>
+      </v-list-item>
+    </v-list>
+  </v-menu>
+</div>
                     <v-btn
                       @click="AddToCart(item, itemSizes[item.menuCode], getCurrentPrice(item))"
                       class="mt-1 text-subtitle-2"
@@ -217,6 +217,7 @@ const moreDialog = ref(false);
 const dialog = ref(false);
 const img = ref('');
 const itemSizes = reactive({});
+const showSizeSelector = false;
 const data = reactive({});
 
 function generateUniqueDesc(name) {

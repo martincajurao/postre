@@ -72,14 +72,61 @@
                         <v-col cols="12" class=" pa-1">
                             <h4>Date & Time <v-icon size="small">mdi-information-outline</v-icon></h4>
                         </v-col>
-                        <v-col cols="6" class="px-1 text-body-2" sm="6">
-                            <VueDatePicker placeholder="Select Date" :offset="-20" dark v-model="date"
-                                :enable-time-picker="false" required  />
-                        </v-col>
-                        <v-col cols="6" class="px-1 text-body-2" sm="6">
-                            <VueDatePicker placeholder="Select Time" :offset="-20" dark v-model="time" time-picker
-                                :is-24="false" required />
-                        </v-col>
+<v-col cols="6" class="px-1 text-body-2" sm="6">
+  <v-menu
+    v-model="menuDate"
+    :close-on-content-click="false"
+    transition="scale-transition"
+    offset-y
+    min-width="auto"
+  >
+    <template #activator="{ props }">
+      <v-text-field
+        v-model="date"
+        label="Select Date"
+        prepend-icon="mdi-calendar"
+        readonly
+        v-bind="props"
+        density="compact"
+        variant="outlined"
+        required
+      ></v-text-field>
+    </template>
+    <v-date-picker
+      v-model="date"
+      no-title
+      scrollable
+      @input="menuDate = false"
+    ></v-date-picker>
+  </v-menu>
+</v-col>
+<v-col cols="6" class="px-1 text-body-2" sm="6">
+  <v-menu
+    v-model="menuTime"
+    :close-on-content-click="false"
+    transition="scale-transition"
+    offset-y
+    min-width="auto"
+  >
+    <template #activator="{ props }">
+      <v-text-field
+        v-model="time"
+        label="Select Time"
+        prepend-icon="mdi-clock-outline"
+        readonly
+        v-bind="props"
+        density="compact"
+        variant="outlined"
+        required
+      ></v-text-field>
+    </template>
+    <v-time-picker
+      v-model="time"
+      format="ampm"
+      @input="menuTime = false"
+    ></v-time-picker>
+  </v-menu>
+</v-col>
                         <v-col cols="12" sm="12">
                             <label v-show="dateError" class="text-red">Please Select Date & Time.</label>
                         </v-col>
@@ -259,9 +306,9 @@
                 𝑵𝒂𝒎𝒆: {{ data.name }}<br>
                 𝑪𝒐𝒏𝒕𝒂𝒄𝒕#: {{ data.contact }}<br>
                 𝑶𝒓𝒅𝒆𝒓: <br>
-                <span  v-for="item,  i in cartStore.orders.items">
-                   - {{ item.menuName }}<br>
-                </span>
+<span v-for="(item, i) in cartStore.orders.items" :key="i">
+  {{ item.buyQty }}x {{ item.selectedSize ? item.selectedSize.charAt(0).toUpperCase() : '' }} {{ item.menuName }}<br>
+</span>
                 Delivery Fee: (unknown)<br>
                 Total: {{ (cartStore.orders.total - cartStore.orders.disctotal).toLocaleString('en-US')  }}<br>
                 𝑳𝒐𝒄𝒂𝒕𝒊𝒐𝒏,,𝒍𝒂𝒏𝒅𝒎𝒂𝒓𝒌: {{ data.address }}
@@ -301,8 +348,6 @@
 </template>
 <script setup>
 import { ref, getCurrentInstance, onMounted, computed } from 'vue';
-import VueDatePicker from '@vuepic/vue-datepicker';
-import '@vuepic/vue-datepicker/dist/main.css';
 import moment from 'moment';
 import { useCartStore } from '@/stores/cart'; // Import the Pinia store
 
@@ -327,7 +372,10 @@ function downloadImage(url, name) {
 const cartStore = useCartStore();
 
 // Reactive state
+const date = ref(null);
 const time = ref(null);
+const menuDate = ref(false);
+const menuTime = ref(false);
 const myForm = ref();
 const dateError = ref(false);
 const menudialog = ref(false);
@@ -358,14 +406,37 @@ onMounted(() => {
 });
 
 // Methods
-const submit = () => {
-  myForm.value?.validate().then(({ valid: isValid }) => {
+import { getFunctions, httpsCallable } from "firebase/functions";
+
+const submit = async () => {
+  myForm.value?.validate().then(async ({ valid: isValid }) => {
     if (time.value == null || date.value == null) {
       dateError.value = true;
       window.scrollTo(0, 0);
     } else {
-      menudialog.value = true;
       dateError.value = false;
+
+      // Generate details text
+      let details = `Reservation Details:\nName: ${data.value.name}\nContact: ${data.value.contact}\nAddress: ${data.value.address}\nDate & Time: ${format_date(date.value)}, ${format_time(time.value)}\nOrder:\n`;
+      cartStore.orders.items.forEach((item) => {
+        details += `${item.buyQty}x ${item.selectedSize ? item.selectedSize.charAt(0).toUpperCase() : ''} ${item.menuName}\n`;
+      });
+      details += `Total: ${cartStore.orders.total.toLocaleString('en-US')}`;
+
+      // Call Firebase Cloud Function to send SMS
+      try {
+        const functions = getFunctions();
+        const sendSmsNotification = httpsCallable(functions, 'sendSmsNotification');
+        const result = await sendSmsNotification({
+          phoneNumber: data.value.contact,
+          message: details,
+        });
+        console.log('SMS sent, SID:', result.data.sid);
+        menudialog.value = true;
+      } catch (error) {
+        console.error('Failed to send SMS:', error);
+        alert('Failed to send SMS notification. Please try again later.');
+      }
     }
   });
 };
@@ -384,8 +455,7 @@ const format_date = (value) => {
 
 const format_time = (value) => {
   if (value) {
-    let newTime = value.hours + ':' + value.minutes + ':' + value.seconds;
-    return moment(newTime, 'HH:mm:ss').format('hh:mm A');
+    return moment(value, 'HH:mm').format('h:mm A');
   }
 };
 </script>

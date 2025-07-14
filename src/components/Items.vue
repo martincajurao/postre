@@ -44,26 +44,26 @@
           </div>
         </v-col>
           <v-col cols="4" class="pa-0 d-flex align-center justify-center" v-if="data.menuName.toLowerCase() !== 'manfo crepe'">
-              <v-btn-toggle
-                v-model="selectedSize"
-                mandatory
-                class="v-select-custom-align"
-                style="max-width: 120px; padding: 2px;"
-                density="compact"
-                variant="outlined"
-                :key="props.data.menuCode"
-              >
-                <v-btn
-                  v-for="size in data.menuPrices ? Object.keys(data.menuPrices) : []"
-                  :key="size"
-                  :value="size"
-                  class="text-capitalize"
-                  density="compact"
-                  style="min-width: 40px; padding: 2px;"
-                >
-                  {{ size === 'medium' ? 'M' : size === 'large' ? 'L' : size }}
-                </v-btn>
-              </v-btn-toggle>
+<v-btn-toggle
+  v-model="selectedSize"
+  mandatory
+  class="v-select-custom-align"
+  style="max-width: 100px; padding: 0; overflow-x: hidden;"
+  density="compact"
+  variant="outlined"
+  :key="props.data.menuCode"
+>
+  <v-btn
+    v-for="size in data.menuPrices ? Object.keys(data.menuPrices) : []"
+    :key="size"
+    :value="size"
+    class="text-capitalize"
+    density="compact"
+    style="min-width: 40px; padding: 0px;"
+  >
+    {{ size === 'medium' ? 'M' : size === 'large' ? 'L' : size }}
+  </v-btn>
+</v-btn-toggle>
           </v-col>
         <v-col cols="4" class="pa-0" v-if="!isCombo">
           <div class="d-flex justify-end">
