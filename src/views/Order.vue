@@ -228,10 +228,15 @@
                 </v-btn>
             </v-toolbar>
 
-            <v-tabs v-model="tab" color="orange" align-tabs="center" stacked class="">
+                <v-tabs v-model="tab" color="orange" align-tabs="center" stacked class="">
                 <v-tab value="PO">
                     <v-icon>mdi-pig</v-icon>
                     <div class="text-body-1"> Pork</div>
+                </v-tab>
+
+                <v-tab value="BF">
+                    <v-icon>mdi-cow</v-icon>
+                    <div class="text-body-1"> Beef</div>
                 </v-tab>
 
                 <v-tab value="CH">

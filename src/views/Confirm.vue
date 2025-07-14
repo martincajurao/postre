@@ -1,4 +1,4 @@
- <template>
+gory <template>
     <v-container class="pb-0">
         <v-img src="" class="align-end text-white py-0" height="150" cover>
             <v-card-title class="text-body-1">
@@ -135,7 +135,7 @@
 
                 <v-responsive style="background-color: #0E0E10;" class="px-5 py-4 my-4">
                     <h3 class="text-h8 font-weight-bold mb-4">
-                        ORDERED ITEMS ({{ cartStore.orders.items.length }})
+                        ORDERED ITEMS ({{ cartStore.orders.items ? cartStore.orders.items.length : 0 }})
                     </h3>
                     <v-table density="comfortable" style="background-color: #0E0E10;">
                         <thead >
@@ -152,7 +152,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="item,  i in cartStore.orders.items">
+                            <tr v-for="(item, i) in (cartStore.orders.items || [])" :key="i">
                                 <td  style="width: 15px;">{{ i+1 }}</td>
                                 <td class="pl-0">
                                     <div class="d-flex align-center ">
@@ -299,7 +299,7 @@
       <v-container fluid class="fill-height">
       <v-row style="border:1px solid greenyellow;">
          <v-col cols="12" sm="12" class="d-flex justify-center">
-            <span  ref="copytext">
+<div ref="copytextRef" style="white-space: pre-line;">
                 𝙍𝙀𝙎𝙀𝙍𝙑𝘼𝙏𝙄𝙊𝙉 𝙁𝙊𝙍𝙈  <br>
                 𝑷𝒐𝒔𝒕𝒓𝒆 𝑪𝒓𝒆𝒑𝒆 𝒅𝒆 𝑴𝒂𝒏𝒈𝒐'𝒔: <br>
                 𝑫𝒂𝒕𝒆&𝑻𝒊𝒎𝒆: {{ format_date(date) }}, {{format_time(time)}}<br>
@@ -312,7 +312,7 @@
                 Delivery Fee: (unknown)<br>
                 Total: {{ (cartStore.orders.total - cartStore.orders.disctotal).toLocaleString('en-US')  }}<br>
                 𝑳𝒐𝒄𝒂𝒕𝒊𝒐𝒏,,𝒍𝒂𝒏𝒅𝒎𝒂𝒓𝒌: {{ data.address }}
-            </span>
+            </div>
         </v-col>
     </v-row>
     <div class="mt-2 text-subtitle-2">
@@ -322,7 +322,7 @@
             type="info"
             elevation="2"
             >
-            Copy the details and send it to <a href="https://www.facebook.com/nikotinzxcv">Postre Niko</a> <br>
+            Copy the details and send it to <a href="https://www.facebook.com/nikotinzxcv">Postre Niko</a> or send it via SMS to 09914680084 <br>
             Delivery Fee is not included in the total amount.
         </v-alert>
     </div>
@@ -344,10 +344,17 @@
         </v-card>
     </v-dialog>
 
+    <v-snackbar
+      v-model="copySnackbar"
+      :color="copySnackbarColor"
+      :timeout="4000"
+    >
+      {{ copySnackbarText }}
+    </v-snackbar>
     
 </template>
 <script setup>
-import { ref, getCurrentInstance, onMounted, computed } from 'vue';
+import { getCurrentInstance, onMounted, computed, ref } from 'vue';
 import moment from 'moment';
 import { useCartStore } from '@/stores/cart'; // Import the Pinia store
 
@@ -379,6 +386,10 @@ const menuTime = ref(false);
 const myForm = ref();
 const dateError = ref(false);
 const menudialog = ref(false);
+const copySnackbar = ref(false);
+const copySnackbarText = ref('');
+const copySnackbarColor = ref('success');
+const copytextRef = ref(null);
 const data = ref({
   name: '',
   contact: '',
@@ -406,45 +417,41 @@ onMounted(() => {
 });
 
 // Methods
-import { getFunctions, httpsCallable } from "firebase/functions";
-
 const submit = async () => {
-  myForm.value?.validate().then(async ({ valid: isValid }) => {
+  myForm.value?.validate().then(({ valid: isValid }) => {
     if (time.value == null || date.value == null) {
       dateError.value = true;
       window.scrollTo(0, 0);
     } else {
       dateError.value = false;
 
-      // Generate details text
-      let details = `Reservation Details:\nName: ${data.value.name}\nContact: ${data.value.contact}\nAddress: ${data.value.address}\nDate & Time: ${format_date(date.value)}, ${format_time(time.value)}\nOrder:\n`;
-      cartStore.orders.items.forEach((item) => {
-        details += `${item.buyQty}x ${item.selectedSize ? item.selectedSize.charAt(0).toUpperCase() : ''} ${item.menuName}\n`;
-      });
-      details += `Total: ${cartStore.orders.total.toLocaleString('en-US')}`;
-
-      // Call Firebase Cloud Function to send SMS
-      try {
-        const functions = getFunctions();
-        const sendSmsNotification = httpsCallable(functions, 'sendSmsNotification');
-        const result = await sendSmsNotification({
-          phoneNumber: data.value.contact,
-          message: details,
-        });
-        console.log('SMS sent, SID:', result.data.sid);
-        menudialog.value = true;
-      } catch (error) {
-        console.error('Failed to send SMS:', error);
-        alert('Failed to send SMS notification. Please try again later.');
-      }
+      // Show confirmation dialog without SMS sending
+      menudialog.value = true;
     }
   });
 };
 
-const copy = () => {
-  const internalInstance = getCurrentInstance();
-  const textx = internalInstance.refs.copytext.innerText;
-  navigator.clipboard.writeText(textx).then(() => {});
+const copy = async () => {
+  try {
+    if (!copytextRef.value) {
+      throw new Error('Copy text element not initialized');
+    }
+    
+    const textToCopy = copytextRef.value.textContent?.trim();
+    if (!textToCopy) {
+      throw new Error('Text content is empty');
+    }
+
+    await navigator.clipboard.writeText(textToCopy);
+    copySnackbarText.value = 'Text copied to clipboard!';
+    copySnackbarColor.value = 'success';
+  } catch (error) {
+    copySnackbarText.value = 'Failed to copy text: ' + error.message;
+    copySnackbarColor.value = 'error';
+    console.error('Copy failed:', error);
+  } finally {
+    copySnackbar.value = true;
+  }
 };
 
 const format_date = (value) => {

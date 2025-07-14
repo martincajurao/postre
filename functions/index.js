@@ -1,11 +1,11 @@
 const functions = require('firebase-functions');
-const twilio = require('twilio');
+const plivo = require('plivo');
 
-const accountSid = functions.config().twilio.sid;
-const authToken = functions.config().twilio.token;
-const fromNumber = functions.config().twilio.from;
+const authId = functions.config().plivo.auth_id;
+const authToken = functions.config().plivo.auth_token;
+const srcNumber = functions.config().plivo.src_number;
 
-const client = twilio(accountSid, authToken);
+const client = new plivo.Client(authId, authToken);
 
 exports.sendSmsNotification = functions.https.onCall(async (data, context) => {
   const { phoneNumber, message } = data;
@@ -16,12 +16,12 @@ exports.sendSmsNotification = functions.https.onCall(async (data, context) => {
   }
 
   try {
-    const messageResponse = await client.messages.create({
-      body: message,
-      from: fromNumber,
-      to: phoneNumber.startsWith('+') ? phoneNumber : '+63' + phoneNumber.replace(/^0+/, ''),
-    });
-    return { success: true, sid: messageResponse.sid };
+    const response = await client.messages.create(
+      srcNumber,
+      phoneNumber.startsWith('+') ? phoneNumber : '+63' + phoneNumber.replace(/^0+/, ''),
+      message
+    );
+    return { success: true, messageUuid: response.messageUuid };
   } catch (error) {
     throw new functions.https.HttpsError('unknown', 'Failed to send SMS: ' + error.message);
   }
