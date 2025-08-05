@@ -1,4 +1,4 @@
-<template>
+  <template>
     <v-app id="inspire">
         <template v-if="isAuthenticated">
             <v-navigation-drawer v-model="drawer">
@@ -60,7 +60,7 @@
                                     <div v-if="item.disc" class="text-caption text-green-accent-3">Discounted</div>
                                     <div class="d-flex align-center">
                                         <div class="font-weight-bold text-body-2 me-auto"><span>&#8369;</span> {{
-        item.menuPrice }}
+        item.menuPrices.large }}
                                         </div>
                                         <v-btn @click="edit(item)" size="small" class="mr-1"><v-icon>mdi-pencil</v-icon></v-btn>
                                         <v-btn @click="remove(item)" size="small"><v-icon>mdi-delete-empty</v-icon></v-btn>
@@ -89,7 +89,10 @@
                                     variant="underlined"></v-text-field>
                                 <v-text-field clearable v-model="menu.menuDesc" color="primary" label="Menu Description"
                                     variant="underlined"></v-text-field>
-                                <v-text-field clearable v-model="menu.menuPrice" color="primary" label="Price"
+                             
+                                <v-text-field clearable v-model="menu.menuPrices.medium" color="primary" label="Medium Price"
+                                    variant="underlined"></v-text-field>
+                                <v-text-field clearable v-model="menu.menuPrices.large" color="primary" label="Large Price"
                                     variant="underlined"></v-text-field>
                                 <v-switch color="green" v-model="menu.isHot" label="Hot Menu"></v-switch>
                                 <v-card-actions>
@@ -334,7 +337,7 @@ const menu = ref({
     menuCode: null,
     img: '',
     menuName: '',
-    menuPrice: '',
+    menuPrices: '',
     branches: [],
 });
 const drawer = ref(null)
@@ -369,13 +372,16 @@ onMounted(() => {
 });
 
 function getdata() {
-  const que = query(fireRef(db, 'Menu'), orderByChild('menuName'));
+  const que = query(fireRef(db, 'MenuCategory'));
   get(que).then((snapshot) => {
-    const sorted = {}
-    snapshot.forEach(function (child) {
-      sorted[child.val().menuCode] = child.val()
+    const allItems = {}
+    snapshot.forEach(function (categorySnapshot) {
+      categorySnapshot.forEach(function (itemSnapshot) {
+        const item = itemSnapshot.val()
+        allItems[item.menuCode] = item
+      })
     });
-    data.value = sorted
+    data.value = allItems
   })
 }
 
@@ -464,6 +470,8 @@ function clearForm() {
     img: '',
     menuName: '',
     menuPrice: '',
+    mediumPrice: '',
+    largePrice: '',
     branches: [],
   };
   image.value = null;
