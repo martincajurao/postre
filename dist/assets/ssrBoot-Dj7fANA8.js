@@ -1,0 +1,1 @@
+import{a0 as t,o as e,a1 as s,cn as n}from"./index-B7PGE_pd.js";function i(){const o=t(!1);return e(()=>{window.requestAnimationFrame(()=>{o.value=!0})}),{ssrBootStyles:s(()=>o.value?void 0:{transition:"none !important"}),isBooted:n(o)}}export{i as u};
