@@ -1,0 +1,33 @@
+0000000000000000000000000000000000000000 9b8cd77e47a341493c5d87373a8cdec98f4eea5d Martin <martincajurao@gmail.com> 1677331477 +0800	commit (initial): first update
+9b8cd77e47a341493c5d87373a8cdec98f4eea5d dd1ee87b320dc8971499fade1137c1b203f90de6 Martin <martincajurao@gmail.com> 1677383292 +0800	commit (merge): Merge branch 'main' of github.com:martincajurao/postre
+dd1ee87b320dc8971499fade1137c1b203f90de6 0fe319ef8e33f9b0418e5ce362dd85d32c6815f3 Martin <martincajurao@gmail.com> 1677478802 +0800	commit: updates on combo
+0fe319ef8e33f9b0418e5ce362dd85d32c6815f3 56feb3551315274d9b2955b7007d0718fe30cb7c Martin <martincajurao@gmail.com> 1677935775 +0800	commit: updated in combo
+56feb3551315274d9b2955b7007d0718fe30cb7c e42bce355f7f8da44a295f1de35177a7f26470be Martin <martincajurao@gmail.com> 1678113409 +0800	commit: combo final
+e42bce355f7f8da44a295f1de35177a7f26470be a151cd356d6afcc637cece96c007feda25adab73 Martin <martincajurao@gmail.com> 1678339584 +0800	commit: menu dialog
+a151cd356d6afcc637cece96c007feda25adab73 8a2a230753313e4ef70e6b685cbf4041b2b8eea0 Martin <martincajurao@gmail.com> 1678431147 +0800	commit: fix item selection
+8a2a230753313e4ef70e6b685cbf4041b2b8eea0 f3cf697eab76b710225b267116aa2f6f900ac460 Postre Dev <dev@postre.com> 1751815567 +0800	commit: feat: add category filter to combo dialog and ensure branch names are lowercased on save in admin panel
+f3cf697eab76b710225b267116aa2f6f900ac460 76b4e6c14058f8add6aa949b1b203433430180ea Postre Dev <dev@postre.com> 1751956767 +0800	commit: Checkpoint save
+76b4e6c14058f8add6aa949b1b203433430180ea d772cd47a2185347b4e079a3fe997bd38277fdac Postre Dev <dev@postre.com> 1751960992 +0800	commit: "update"
+d772cd47a2185347b4e079a3fe997bd38277fdac 8e4727570574e78927feedc54924505403e2af19 Postre Dev <dev@postre.com> 1751961407 +0800	commit: "update_menu"
+8e4727570574e78927feedc54924505403e2af19 0a8200d619cb8bbe30536a48ddf66541bb391d06 Postre Dev <dev@postre.com> 1751966454 +0800	revert: Revert ""update_menu""
+0a8200d619cb8bbe30536a48ddf66541bb391d06 8e4727570574e78927feedc54924505403e2af19 Postre Dev <dev@postre.com> 1751969980 +0800	reset: moving to 8e47275
+8e4727570574e78927feedc54924505403e2af19 fe8c3530c1f1609c1a871ea53c32b424d3d4497b Postre Dev <dev@postre.com> 1752035204 +0800	commit: "Backup"
+fe8c3530c1f1609c1a871ea53c32b424d3d4497b cd097f3725d072bef85f29e08d6277bd09e38f11 Postre Dev <dev@postre.com> 1752035587 +0800	commit: "feat-size-integration"
+cd097f3725d072bef85f29e08d6277bd09e38f11 8e4727570574e78927feedc54924505403e2af19 Postre Dev <dev@postre.com> 1752043446 +0800	reset: moving to 8e4727570574e78927feedc54924505403e2af19
+8e4727570574e78927feedc54924505403e2af19 e75b85a6730511c9de960d8028f6f9f537151441 Postre Dev <dev@postre.com> 1752144280 +0800	commit: feat: Implement Pinia for state management and fix reactivity
+e75b85a6730511c9de960d8028f6f9f537151441 16087fa73c443bb4e28e8b3ebea307fa3d979ec9 Postre Dev <dev@postre.com> 1752154051 +0800	commit: "Refactor"
+16087fa73c443bb4e28e8b3ebea307fa3d979ec9 d39d9cb3d612e899789110424fb3e4b5dd454d48 Postre Dev <dev@postre.com> 1752155215 +0800	commit: "Fixes"
+d39d9cb3d612e899789110424fb3e4b5dd454d48 81ae59c72c5548f7c6a759929fbc99a2488cb5ac Postre Dev <dev@postre.com> 1752157509 +0800	commit: "Fixes"
+81ae59c72c5548f7c6a759929fbc99a2488cb5ac da01adc475d500cb02fb434c5e999feb730dcdf1 Postre Dev <dev@postre.com> 1752228274 +0800	commit: \"Fix: Ensure accurate combo and item subtotal calculation in Order.vue\"
+da01adc475d500cb02fb434c5e999feb730dcdf1 da01adc475d500cb02fb434c5e999feb730dcdf1 Postre Dev <dev@postre.com> 1752380981 +0800	reset: moving to HEAD
+da01adc475d500cb02fb434c5e999feb730dcdf1 da01adc475d500cb02fb434c5e999feb730dcdf1 Postre Dev <dev@postre.com> 1752387203 +0800	reset: moving to HEAD
+da01adc475d500cb02fb434c5e999feb730dcdf1 da01adc475d500cb02fb434c5e999feb730dcdf1 Postre Dev <dev@postre.com> 1752392594 +0800	reset: moving to HEAD
+da01adc475d500cb02fb434c5e999feb730dcdf1 bc59f81ef0fb8ee58d000948d3edf9776abf27e9 Postre Dev <dev@postre.com> 1752397329 +0800	commit: Save migration script state for updating combo menuPrices large values
+bc59f81ef0fb8ee58d000948d3edf9776abf27e9 4fee78ed81823f7b4aa7c66d0ee210f980faab87 Postre Dev <dev@postre.com> 1752416176 +0800	commit: Fix syntax error in cart store by consolidating duplicated code and correcting file structure
+4fee78ed81823f7b4aa7c66d0ee210f980faab87 3fdd4b64744f9f63bc169db93343ad8f0a31f48a Postre Dev <dev@postre.com> 1752450718 +0800	commit: working upto confirm page
+3fdd4b64744f9f63bc169db93343ad8f0a31f48a 35cd8fd6af00c5887add83fbd4fd6443bce100f8 Postre Dev <dev@postre.com> 1752457656 +0800	commit: generate details fixed
+35cd8fd6af00c5887add83fbd4fd6443bce100f8 694ebae5dcb6d157f0f473a95bf9cbb2ce0293f1 Postre Dev <dev@postre.com> 1752470855 +0800	commit: working fine
+694ebae5dcb6d157f0f473a95bf9cbb2ce0293f1 f5d96e8e1724e453699ebd61768c74b920b2bfec Postre Dev <dev@postre.com> 1752471910 +0800	commit: Remove service account key and update gitignore
+f5d96e8e1724e453699ebd61768c74b920b2bfec f5d96e8e1724e453699ebd61768c74b920b2bfec Postre Dev <dev@postre.com> 1754387981 +0800	reset: moving to HEAD
+f5d96e8e1724e453699ebd61768c74b920b2bfec 95b84c379905efed9a27a722d52e7559424c4a40 Postre Dev <dev@postre.com> 1754397760 +0800	commit: working admin
+95b84c379905efed9a27a722d52e7559424c4a40 b1fb06b5e9e7d3c2a2efd1e83bee9140d5983c4d Postre Dev <dev@postre.com> 1754398081 +0800	commit (merge): merge: resolve conflicts with remote

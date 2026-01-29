@@ -1,0 +1,44 @@
+{
+  "name": "postre-website",
+  "version": "1.0.0",
+  "description": "Postre website with Firebase integration",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite --port 8888",
+    "build": "vite build",
+    "preview": "vite preview --port 8888",
+    "serve": "vite preview --port 8888"
+  },
+  "dependencies": {
+    "@mdi/font": "^7.4.47",
+    "cropperjs": "^1.6.2",
+    "firebase": "^10.7.1",
+    "mitt": "^3.0.1",
+    "moment": "^2.30.1",
+    "pinia": "^3.0.3",
+    "sass": "^1.90.0",
+    "uuid": "^11.1.0",
+    "vue": "^3.3.8",
+    "vue-advanced-cropper": "^2.8.9",
+    "vue-cropperjs": "^5.0.0",
+    "vue-router": "^4.5.1",
+    "vue3-smooth-scroll": "^0.8.1",
+    "vuetify": "^3.4.6",
+    "webfontloader": "^1.6.28"
+  },
+  "devDependencies": {
+    "@react-native-community/cli": "^20.0.0",
+    "@vitejs/plugin-vue": "^6.0.1",
+    "autoprefixer": "^10.4.16",
+    "postcss-nesting": "^12.0.1",
+    "vite": "^7.1.2",
+    "vite-plugin-vuetify": "^2.0.1"
+  },
+  "keywords": [
+    "firebase",
+    "postre",
+    "website"
+  ],
+  "author": "",
+  "license": "ISC"
+}

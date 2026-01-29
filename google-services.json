@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "796146837266",
+    "firebase_url": "https://postres-c30e4-default-rtdb.firebaseio.com",
+    "project_id": "postres-c30e4",
+    "storage_bucket": "postres-c30e4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:796146837266:android:1e0ac69a2dfe60286db5cb",
+        "android_client_info": {
+          "package_name": "com.example.test"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCruQjxkKaX0f4J61YrPvTVyTsEOeASl6w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:796146837266:android:e729f32b740429ea6db5cb",
+        "android_client_info": {
+          "package_name": "postre.dashboard"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCruQjxkKaX0f4J61YrPvTVyTsEOeASl6w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

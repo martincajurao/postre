@@ -1,0 +1,32 @@
+{
+  "appId": "com.postre.app",
+  "appName": "Postre",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "backgroundColor": "#ffffff",
+  "android": {
+    "buildOptions": {
+      "keystorePath": "./keystore/postre.keystore",
+      "keystorePassword": "postre2024",
+      "keystoreAlias": "postre-key",
+      "keystoreAliasPassword": "postre2024"
+    },
+    "splash": {
+      "launchShowDuration": 3000,
+      "launchAutoHide": true,
+      "backgroundColor": "#ffffff",
+      "androidSplashResourceName": "splash"
+    }
+  },
+  "plugins": {
+    "PushNotifications": {
+      "presentationOptions": ["badge", "sound", "alert"]
+    },
+    "Camera": {
+      "presentationStyle": "fullscreen"
+    },
+    "Geolocation": {
+      "permissions": ["location"]
+    }
+  }
+}
